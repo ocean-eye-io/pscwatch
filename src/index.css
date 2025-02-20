@@ -1,0 +1,25 @@
+/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  color: #f4f4f4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base styles for buttons */
+button {
+  font-family: 'Nunito', sans-serif;
+}
+
+/* Base styles for inputs */
+input, select {
+  font-family: 'Nunito', sans-serif;
+}
