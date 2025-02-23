@@ -7,7 +7,7 @@ import VesselFilters from '../components/manager/Filters/VesselFilters';
 import InstructionsPanel from '../components/manager/QuickActions/InstructionsPanel';
 
 // Use environment variable for API URL
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = https://psc-tracker-backend.onrender.com;
 
 const ManagerDashboard = () => {
   const [vessels, setVessels] = useState([]);
