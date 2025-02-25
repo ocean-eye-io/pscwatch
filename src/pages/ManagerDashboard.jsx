@@ -5,12 +5,15 @@ import ArrivalTimelineChart from '../components/manager/Charts/ArrivalTimelineCh
 import VesselTable from '../components/manager/VesselTable/VesselTable';
 import VesselFilters from '../components/manager/Filters/VesselFilters';
 import InstructionsPanel from '../components/manager/QuickActions/InstructionsPanel';
+import { VESSEL_FIELDS, FILTER_FIELDS } from '../config/fieldMappings';
+import { transformVesselData, calculateChartData, getUniqueFieldValues } from '../utils/vesselDataTransformer';
 
 // Use environment variable for API URL
-const API_URL = 'https://nxjfpzxlkrn6peljc572eo5sxm0pggon.lambda-url.us-east-1.on.aws/';
+const API_URL = 'https://nxjfpzxlkrn6peljc572eo5sxm0pggon.lambda-url.us-east-1.on.aws';
 
 const ManagerDashboard = () => {
   const [vessels, setVessels] = useState([]);
+  const [filteredVessels, setFilteredVessels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedVessel, setSelectedVessel] = useState(null);
@@ -22,50 +25,61 @@ const ManagerDashboard = () => {
   const [filters, setFilters] = useState({
     port: '',
     status: '',
-    vesselType: ''
+    country: ''
+  });
+  const [filterOptions, setFilterOptions] = useState({
+    ports: [],
+    statuses: [],
+    countries: []
   });
 
   useEffect(() => {
     fetchVesselData();
   }, []);
 
-  const calculateDaysToGo = (eta) => {
-    if (!eta) return null;
-    const days = (new Date(eta) - new Date()) / (1000 * 60 * 60 * 24);
-    return Math.max(0, Math.round(days * 10) / 10);
-  };
+  useEffect(() => {
+    // Apply filters whenever vessels or filters change
+    applyFilters();
+  }, [vessels, filters]);
 
   const fetchVesselData = async () => {
     try {
       setLoading(true);
+      
+      // Fetch vessel data
       const response = await fetch(`${API_URL}/api/vessels`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
       const data = await response.json();
       
-      const transformedData = data.map(vessel => ({
-        id: vessel.imo_no,
-        name: vessel.vessel_name,
-        vesselType: 'Bulk Carrier',
-        arrivingPort: vessel.toport,
-        eta: vessel.eta ? new Date(vessel.eta).toLocaleString() : '-',
-        etb: vessel.etb ? new Date(vessel.etb).toLocaleString() : '-',
-        etd: vessel.etd ? new Date(vessel.etd).toLocaleString() : '-',
-        daysToGo: calculateDaysToGo(vessel.eta),
-        arrivalCountry: vessel.tocountry,
-        fromPort: vessel.fromport,
-        departureCountry: vessel.fromcountry,
-        lastReportDate: new Date(vessel.report_date).toLocaleString(),
-        eventType: vessel.event_type,
-        departureDate: vessel.atd ? new Date(vessel.atd).toLocaleString() : '-',
-        owner: vessel.owner,
-        imoNo: vessel.imo_no,
-        riskScore: Math.floor(Math.random() * 100) // Example risk score
-      }));
+      // Find the latest data date
+      const latestDate = data.reduce((latest, vessel) => {
+        const vesselDate = new Date(vessel.dwh_load_date);
+        return !latest || vesselDate > latest ? vesselDate : latest;
+      }, null);
 
+      // Filter for only latest data
+      const latestData = data.filter(vessel => 
+        new Date(vessel.dwh_load_date).getTime() === latestDate.getTime()
+      );
+      
+      // Transform the data for UI
+      const transformedData = transformVesselData(latestData);
+      
+      // Update state
       setVessels(transformedData);
-      updateChartData(transformedData);
+      
+      // Build filter options
+      setFilterOptions({
+        ports: getUniqueFieldValues(transformedData, 'arrival_port'),
+        statuses: getUniqueFieldValues(transformedData, 'event_type'),
+        countries: getUniqueFieldValues(transformedData, 'arrival_country')
+      });
+      
+      // Calculate chart data
+      setChartData(calculateChartData(transformedData));
+      
     } catch (err) {
       console.error('Error fetching vessel data:', err);
       setError('Failed to load vessel data');
@@ -74,36 +88,27 @@ const ManagerDashboard = () => {
     }
   };
 
-  const updateChartData = (vesselData) => {
-    // Calculate port statistics
-    const portCounts = vesselData.reduce((acc, vessel) => {
-      if (vessel.arrivingPort) {
-        acc[vessel.arrivingPort] = (acc[vessel.arrivingPort] || 0) + 1;
-      }
-      return acc;
-    }, {});
-
-    // Calculate timeline data
-    const threeDaysCount = vesselData.filter(v => {
-      const days = calculateDaysToGo(v.eta);
-      return days !== null && days <= 3;
-    }).length;
-
-    const tenDaysCount = vesselData.filter(v => {
-      const days = calculateDaysToGo(v.eta);
-      return days !== null && days > 3 && days <= 10;
-    }).length;
-
-    setChartData({
-      arrivalsByPort: Object.entries(portCounts).map(([port, vessels]) => ({
-        port,
-        vessels
-      })),
-      arrivalTimeline: [
-        { range: '<3 Days', vessels: threeDaysCount, color: '#E74C3C' },
-        { range: '<10 Days', vessels: tenDaysCount, color: '#F1C40F' }
-      ]
-    });
+  const applyFilters = () => {
+    let result = [...vessels];
+    
+    // Apply port filter
+    if (filters.port) {
+      result = result.filter(vessel => vessel.arrival_port === filters.port);
+    }
+    
+    // Apply status filter
+    if (filters.status) {
+      result = result.filter(vessel => vessel.event_type === filters.status);
+    }
+    
+    // Apply country filter
+    if (filters.country) {
+      result = result.filter(vessel => vessel.arrival_country === filters.country);
+    }
+    
+    // Update filtered vessels and chart data
+    setFilteredVessels(result);
+    setChartData(calculateChartData(result));
   };
 
   const handleFilterChange = (filterType, value) => {
@@ -116,10 +121,14 @@ const ManagerDashboard = () => {
   };
 
   const handleSaveInstructions = (vesselId, instructions) => {
+    // Update instructions for this vessel
     setVessels(prev =>
-      prev.map(v => v.id === vesselId ? { ...v, instructions } : v)
+      prev.map(v => v.imo_no === vesselId ? { ...v, instructions } : v)
     );
     setShowInstructions(false);
+    
+    // Here you would also make an API call to save the instructions
+    // saveVesselInstructions(vesselId, instructions);
   };
 
   if (loading) {
@@ -138,6 +147,8 @@ const ManagerDashboard = () => {
     );
   }
 
+  const displayVessels = filteredVessels.length > 0 ? filteredVessels : vessels;
+
   return (
     <div style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
       <div style={{
@@ -151,9 +162,13 @@ const ManagerDashboard = () => {
           fontWeight: '700',
           color: '#f4f4f4',
         }}>
-          Fleet Overview ({vessels.length} Vessels)
+          Fleet Overview ({displayVessels.length} Vessels)
         </h1>
-        <VesselFilters onFilterChange={handleFilterChange} />
+        <VesselFilters 
+          onFilterChange={handleFilterChange}
+          options={filterOptions}
+          filters={filters}
+        />
       </div>
 
       <div style={{
@@ -167,28 +182,9 @@ const ManagerDashboard = () => {
       </div>
 
       <VesselTable
-        vessels={vessels}
+        vessels={displayVessels}
         onOpenInstructions={handleOpenInstructions}
-        columns={[
-          { key: 'name', label: 'Vessel' },
-          { key: 'vesselType', label: 'Vessel Type' },
-          { key: 'arrivingPort', label: 'Arriving Port' },
-          { key: 'eta', label: 'ETA' },
-          { key: 'etb', label: 'ETB' },
-          { key: 'etd', label: 'ETD' },
-          { key: 'daysToGo', label: 'Days to Go' },
-          { key: 'eventType', label: 'Status' },
-          { key: 'riskScore', label: 'Risk Score' }
-        ]}
-        expandedColumns={[
-          { key: 'arrivalCountry', label: 'Arrival Country' },
-          { key: 'fromPort', label: 'From Port' },
-          { key: 'departureCountry', label: 'Departure Country' },
-          { key: 'lastReportDate', label: 'Last Report Date' },
-          { key: 'departureDate', label: 'Departure Date' },
-          { key: 'owner', label: 'Owner' },
-          { key: 'imoNo', label: 'IMO NO' }
-        ]}
+        fieldMappings={VESSEL_FIELDS}
       />
 
       {showInstructions && selectedVessel && (
@@ -196,6 +192,7 @@ const ManagerDashboard = () => {
           vessel={selectedVessel}
           onClose={() => setShowInstructions(false)}
           onSave={handleSaveInstructions}
+          fieldMappings={INSTRUCTIONS_FIELDS}
         />
       )}
     </div>
