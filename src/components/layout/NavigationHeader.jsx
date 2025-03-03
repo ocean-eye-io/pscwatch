@@ -12,10 +12,10 @@ const NavigationHeader = ({ activePage }) => {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <Home size={20} />, path: '/dashboard' },
-    { id: 'fleet', label: 'Fleet', icon: <Ship size={20} />, path: '/fleet' },
-    { id: 'ports', label: 'Ports', icon: <Anchor size={20} />, path: '/ports' },
+    //{ id: 'fleet', label: 'Fleet', icon: <Ship size={20} />, path: '/fleet' },
+    //{ id: 'ports', label: 'Ports', icon: <Anchor size={20} />, path: '/ports' },
     { id: 'reports', label: 'Reports', icon: <BarChart2 size={20} />, path: '/reports' },
-    { id: 'settings', label: 'Settings', icon: <Settings size={20} />, path: '/settings' }
+    //{ id: 'settings', label: 'Settings', icon: <Settings size={20} />, path: '/settings' }
   ];
 
   return (

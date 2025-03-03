@@ -17,10 +17,10 @@ export default function Header() {
   
   const navIcons = [
     { src: '/icons/1.svg', active: false },
-    { src: '/icons/2.svg', active: false },
-    { src: '/icons/3.svg', active: false },
+    //{ src: '/icons/2.svg', active: false },
+    //{ src: '/icons/3.svg', active: false },
     { src: '/icons/4.svg', active: false },
-    { src: '/icons/5.svg', active: true }, 
+    //{ src: '/icons/5.svg', active: true }, 
   ];
 
   return (
