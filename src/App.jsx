@@ -1,145 +1,131 @@
 // src/App.jsx
-import React from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link,
-  Navigate,
-} from 'react-router-dom';
-import ManagerDashboard from './pages/ManagerDashboard';
-import VesselInterface from './pages/VesselInterface';
-
-const Navigation = () => (
-  <nav
-    style={{
-      background: '#132337',
-      padding: '1rem',
-      borderBottom: '1px solid rgba(244, 244, 244, 0.1)',
-    }}
-  >
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: '0 1rem',
-      }}
-    >
-      <div
-        style={{
-          color: '#f4f4f4',
-          fontWeight: 'bold',
-          fontSize: '1.25rem',
-          fontFamily: 'Nunito',
-        }}
-      >
-        Maritime Operations
-      </div>
-      <div style={{ display: 'flex', gap: '2rem' }}>
-        <Link
-          to="/manager"
-          style={{
-            color: '#f4f4f4',
-            textDecoration: 'none',
-            fontFamily: 'Nunito',
-            fontSize: '0.875rem',
-          }}
-        >
-          Manager Dashboard
-        </Link>
-        <Link
-          to="/vessel"
-          style={{
-            color: '#f4f4f4',
-            textDecoration: 'none',
-            fontFamily: 'Nunito',
-            fontSize: '0.875rem',
-          }}
-        >
-          Vessel Interface
-        </Link>
-      </div>
-    </div>
-  </nav>
-);
-
-// Simple landing page component
-const LandingPage = () => (
-  <div
-    style={{
-      height: 'calc(100vh - 64px)',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      color: '#f4f4f4',
-      fontFamily: 'Nunito',
-      gap: '2rem',
-    }}
-  >
-    <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>
-      Maritime Operations Platform
-    </h1>
-    <div
-      style={{
-        display: 'flex',
-        gap: '1rem',
-      }}
-    >
-      <Link
-        to="/manager"
-        style={{
-          padding: '0.75rem 1.5rem',
-          background: '#3BADE5',
-          color: '#f4f4f4',
-          textDecoration: 'none',
-          borderRadius: '0.375rem',
-          fontWeight: '600',
-        }}
-      >
-        Manager Dashboard
-      </Link>
-      <Link
-        to="/vessel"
-        style={{
-          padding: '0.75rem 1.5rem',
-          background: '#132337',
-          color: '#f4f4f4',
-          textDecoration: 'none',
-          borderRadius: '0.375rem',
-          fontWeight: '600',
-          border: '1px solid rgba(244, 244, 244, 0.1)',
-        }}
-      >
-        Vessel Interface
-      </Link>
-    </div>
-  </div>
-);
+import React, { useState } from 'react';
+import NavigationHeader from './components/layout/NavigationHeader';
+import FleetDashboard from './components/dashboard/FleetDashboard';
+import './App.css';
 
 function App() {
+  const [activePage, setActivePage] = useState('fleet');
+  
+  // Define your fieldMappings structure
+  const fieldMappings = {
+    TABLE: {
+      vessel_name: { 
+        dbField: 'vessel_name', 
+        label: 'Vessel', 
+        priority: 1, 
+        width: '180px' 
+      },
+      imo: { 
+        dbField: 'imo_no', 
+        label: 'IMO No', 
+        priority: 2, 
+        width: '120px' 
+      },
+      arriving_port: { 
+        dbField: 'arrival_port', 
+        label: 'Arriving Port', 
+        priority: 3, 
+        width: '150px' 
+      },
+      eta: { 
+        dbField: 'eta', 
+        label: 'ETA', 
+        priority: 4, 
+        width: '170px' 
+      },
+      etb: { 
+        dbField: 'etb', 
+        label: 'ETB', 
+        priority: 5, 
+        width: '150px' 
+      },
+      etd: { 
+        dbField: 'etd', 
+        label: 'ETD', 
+        priority: 6, 
+        width: '150px' 
+      },
+      event_type: { 
+        dbField: 'event_type', 
+        label: 'Status', 
+        priority: 7, 
+        width: '140px' 
+      },
+      riskScore: { 
+        dbField: 'riskScore', 
+        label: 'Risk Score', 
+        priority: 8, 
+        width: '120px' 
+      },
+      distance_to_go: { 
+        dbField: 'distance_to_go', 
+        label: 'Distance (nm)', 
+        priority: 9, 
+        width: '130px' 
+      },
+      days_to_go: { 
+        dbField: 'days_to_go', 
+        label: 'Days to Go', 
+        priority: 10, 
+        width: '120px' 
+      }
+    },
+    EXPANDED: {
+      captain: { 
+        dbField: 'captain', 
+        label: 'Captain', 
+        priority: 1 
+      },
+      last_port: { 
+        dbField: 'last_port', 
+        label: 'Last Port', 
+        priority: 2 
+      },
+      cargo_type: { 
+        dbField: 'cargo_type', 
+        label: 'Cargo Type', 
+        priority: 3 
+      },
+      cargo_description: { 
+        dbField: 'cargo_description', 
+        label: 'Cargo Description', 
+        priority: 4 
+      },
+      vessel_type: { 
+        dbField: 'vessel_type', 
+        label: 'Vessel Type', 
+        priority: 5 
+      },
+      destination: { 
+        dbField: 'destination', 
+        label: 'Destination', 
+        priority: 6 
+      },
+      draft: { 
+        dbField: 'draft',
+        label: 'Draft', 
+        priority: 7 
+      }
+    }
+  };
+  
+  const handleOpenInstructions = (vessel) => {
+    console.log('Opening instructions for vessel:', vessel);
+    // Your implementation here
+  };
+
   return (
-    <Router>
-      <div
-        style={{
-          minHeight: '100vh',
-          background: '#0B1623',
-          margin: 0,
-          fontFamily: 'Nunito, sans-serif',
-        }}
-      >
-        <Navigation />
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/manager" element={<ManagerDashboard />} />
-          <Route path="/vessel" element={<VesselInterface />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </div>
-    </Router>
+    <div className="app">
+      <NavigationHeader activePage={activePage} />
+      
+      <main className="app-content">
+        <FleetDashboard 
+          onOpenInstructions={handleOpenInstructions}
+          fieldMappings={fieldMappings}
+        />
+      </main>
+    </div>
   );
 }
 

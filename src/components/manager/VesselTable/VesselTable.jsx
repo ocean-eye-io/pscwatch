@@ -1,126 +1,125 @@
 // src/components/manager/VesselTable/VesselTable.jsx
-import React, { useState } from 'react';
-import VesselTableRow from './VesselTableRow';
-import { ChevronDown } from 'lucide-react';
+import React from 'react';
+import { MessageSquare } from 'lucide-react';
+import { 
+  Table, 
+  StatusIndicator, 
+  TableBadge, 
+  ExpandedItem, 
+  ActionButton 
+} from '../../common/Table';
 
 const VesselTable = ({ vessels, onOpenInstructions, fieldMappings }) => {
-  const [expandedRows, setExpandedRows] = useState(new Set());
-  const [sortConfig, setSortConfig] = useState({ key: 'eta', direction: 'asc' });
-
-  const toggleRowExpansion = (vesselId) => {
-    const newExpandedRows = new Set(expandedRows);
-    if (newExpandedRows.has(vesselId)) {
-      newExpandedRows.delete(vesselId);
+  // Helper function to get status color based on vessel status
+  const getStatusColor = (status) => {
+    if (!status) return '#f4f4f4';
+    
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes('at sea') || statusLower.includes('transit')) {
+      return '#3498DB'; // Blue for at sea
+    } else if (statusLower.includes('port') || statusLower.includes('berth')) {
+      return '#2ECC71'; // Green for at port
+    } else if (statusLower.includes('anchor')) {
+      return '#F1C40F'; // Yellow for at anchor
     } else {
-      newExpandedRows.add(vesselId);
+      return '#f4f4f4'; // Default
     }
-    setExpandedRows(newExpandedRows);
   };
 
-  const handleSort = (key) => {
-    setSortConfig((prevConfig) => ({
-      key,
-      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc',
-    }));
+  // Helper function to get risk score color based on score value
+  const getRiskScoreVariant = (score) => {
+    if (!score && score !== 0) return 'info';
+    if (score < 50) return 'success';
+    if (score < 75) return 'warning';
+    return 'danger';
   };
 
-  // Get visible columns from the field mapping configuration
-  const getVisibleColumns = () => {
+  // Convert field mappings to table columns format
+  const getTableColumns = () => {
     return Object.entries(fieldMappings.TABLE)
       .filter(([_, field]) => !field.isAction)
+      .sort((a, b) => a[1].priority - b[1].priority)
+      .map(([fieldId, field]) => ({
+        field: field.dbField,
+        label: field.label,
+        width: field.width,
+        minWidth: field.minWidth,
+        render: (value, rowData) => {
+          // Special rendering for event_type (status)
+          if (fieldId === 'event_type') {
+            return (
+              <StatusIndicator 
+                status={value} 
+                color={getStatusColor(value)} 
+              />
+            );
+          }
+          
+          // Special rendering for risk score
+          if (fieldId === 'riskScore') {
+            const score = value !== null && value !== undefined ? Math.round(value) : null;
+            return (
+              <TableBadge 
+                variant={getRiskScoreVariant(score)}
+              >
+                {score !== null ? score : '-'}
+              </TableBadge>
+            );
+          }
+          
+          // Special rendering for days to go
+          if (fieldId === 'daysToGo' && typeof value === 'number') {
+            return value.toFixed(1);
+          }
+          
+          // Default rendering
+          return value === null || value === undefined ? '-' : value;
+        }
+      }));
+  };
+
+  // Create expanded content renderer
+  const renderExpandedContent = (vessel) => {
+    const expandedColumns = Object.entries(fieldMappings.EXPANDED)
       .sort((a, b) => a[1].priority - b[1].priority);
+      
+    return (
+      <div className="expanded-grid">
+        {expandedColumns.map(([fieldId, field]) => (
+          <ExpandedItem
+            key={fieldId}
+            label={field.label}
+            value={vessel[field.dbField]}
+          />
+        ))}
+      </div>
+    );
   };
 
-  // Sort the vessels based on sort configuration
-  const getSortedVessels = () => {
-    const sortableVessels = [...vessels];
-    
-    if (sortConfig.key) {
-      sortableVessels.sort((a, b) => {
-        // Handle null/undefined values
-        if (a[sortConfig.key] === null || a[sortConfig.key] === undefined) return 1;
-        if (b[sortConfig.key] === null || b[sortConfig.key] === undefined) return -1;
-        
-        // Compare based on data type
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
-        
-        let result;
-        
-        // Date comparison
-        if (aValue instanceof Date && bValue instanceof Date) {
-          result = aValue.getTime() - bValue.getTime();
-        }
-        // String comparison
-        else if (typeof aValue === 'string' && typeof bValue === 'string') {
-          result = aValue.localeCompare(bValue);
-        }
-        // Number comparison
-        else {
-          result = aValue - bValue;
-        }
-        
-        return sortConfig.direction === 'asc' ? result : -result;
-      });
-    }
-    
-    return sortableVessels;
+  // Create actions content
+  const actions = {
+    label: 'Actions',
+    width: '120px',
+    content: (vessel) => (
+      <ActionButton
+        onClick={() => onOpenInstructions(vessel)}
+        icon={<MessageSquare />}
+      >
+        Instructions
+      </ActionButton>
+    )
   };
-
-  const sortedVessels = getSortedVessels();
-  const visibleColumns = getVisibleColumns();
 
   return (
-    <div style={{ background: '#132337', borderRadius: '8px', overflow: 'hidden' }}>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', color: '#f4f4f4', fontSize: '14px' }}>
-          <thead style={{ background: '#0B1623' }}>
-            <tr>
-              <th style={{ padding: '12px', width: '40px' }}></th>
-              {visibleColumns.map(([fieldId, field]) => (
-                <th 
-                  key={fieldId}
-                  style={{ 
-                    padding: '12px', 
-                    textAlign: 'left',
-                    width: field.width,
-                    minWidth: field.minWidth,
-                    cursor: 'pointer'
-                  }}
-                  onClick={() => handleSort(field.dbField)}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    {field.label}
-                    {sortConfig.key === field.dbField && (
-                      <ChevronDown 
-                        size={16} 
-                        style={{ 
-                          transform: sortConfig.direction === 'desc' ? 'rotate(180deg)' : 'none',
-                          transition: 'transform 0.2s'
-                        }} 
-                      />
-                    )}
-                  </div>
-                </th>
-              ))}
-              <th style={{ padding: '12px', width: '120px' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedVessels.map((vessel) => (
-              <VesselTableRow
-                key={vessel.imo_no}
-                vessel={vessel}
-                isExpanded={expandedRows.has(vessel.imo_no)}
-                onToggleExpand={() => toggleRowExpansion(vessel.imo_no)}
-                onOpenInstructions={onOpenInstructions}
-                fieldMappings={fieldMappings}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <Table
+      data={vessels}
+      columns={getTableColumns()}
+      expandedContent={renderExpandedContent}
+      actions={actions}
+      uniqueIdField="imo_no"
+      defaultSortKey="eta"
+      defaultSortDirection="desc"
+    />
   );
 };
 

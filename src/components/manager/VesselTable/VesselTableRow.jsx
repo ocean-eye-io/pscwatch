@@ -92,23 +92,11 @@ const VesselTableRow = ({
 
   return (
     <>
-      <tr style={{ 
-        borderBottom: '1px solid rgba(244, 244, 244, 0.1)',
-        backgroundColor: isExpanded ? 'rgba(59, 173, 229, 0.1)' : 'transparent',
-        transition: 'background-color 0.2s'
-      }}>
-        <td style={{ padding: '12px', textAlign: 'center' }}>
+      <tr className={`vessel-row ${isExpanded ? 'expanded' : ''}`}>
+        <td>
           <button
+            className="expand-button"
             onClick={onToggleExpand}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#f4f4f4',
-              cursor: 'pointer',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center'
-            }}
             aria-label={isExpanded ? "Collapse row" : "Expand row"}
           >
             {isExpanded ? 
@@ -119,30 +107,32 @@ const VesselTableRow = ({
         </td>
         
         {visibleColumns.map(([fieldId, field]) => (
-          <td 
-            key={fieldId}
-            style={{ 
-              padding: '12px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {renderCellContent(fieldId, vessel[field.dbField])}
+          <td key={fieldId}>
+            {fieldId === 'event_type' ? (
+              <div className="status-indicator">
+                <span 
+                  className="status-dot"
+                  style={{ background: getStatusColor(vessel[field.dbField]) }}
+                ></span>
+                {vessel[field.dbField]}
+              </div>
+            ) : fieldId === 'riskScore' ? (
+              <span 
+                className="risk-score"
+                style={{ color: getRiskScoreColor(vessel[field.dbField]) }}
+              >
+                {formatValue(vessel[field.dbField], fieldId)}
+              </span>
+            ) : (
+              renderCellContent(fieldId, vessel[field.dbField])
+            )}
           </td>
         ))}
 
-        <td style={{ padding: '12px' }}>
+        <td>
           <button
+            className="instructions-button"
             onClick={() => onOpenInstructions(vessel)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#3BADE5',
-              cursor: 'pointer',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
             aria-label="Open instructions"
           >
             <MessageSquare size={16} />
@@ -152,21 +142,19 @@ const VesselTableRow = ({
       </tr>
 
       {isExpanded && (
-        <tr style={{ backgroundColor: 'rgba(59, 173, 229, 0.1)' }}>
-          <td colSpan={visibleColumns.length + 2} style={{ padding: '16px' }}>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '16px'
-            }}>
-              {expandedColumns.map(([fieldId, field]) => (
-                <div key={fieldId}>
-                  <p style={{ color: 'rgba(244, 244, 244, 0.6)', marginBottom: '4px' }}>
-                    {field.label}
-                  </p>
-                  <p>{vessel[field.dbField] || '-'}</p>
-                </div>
-              ))}
+        <tr className="expanded-row">
+          <td colSpan={visibleColumns.length + 2}>
+            <div className="expanded-content">
+              <div className="expanded-grid">
+                {expandedColumns.map(([fieldId, field]) => (
+                  <div key={fieldId} className="expanded-item">
+                    <p className="expanded-label">{field.label}</p>
+                    <p className="expanded-value">
+                      {vessel[field.dbField] || '-'}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           </td>
         </tr>
