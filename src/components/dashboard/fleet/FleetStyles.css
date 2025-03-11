@@ -1341,7 +1341,163 @@
       grid-template-columns: 1fr;
     }
   }
+/* Modern Comment Styling with Hover Preview - Fixed */
+/* Comment Cell Styling */
+.comment-cell {
+    position: relative;
+    z-index: 1;
+  }
   
+  .comment-cell:hover {
+    z-index: 100; /* Ensure tooltip appears above other elements */
+  }
+  
+  .comment-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(10, 20, 33, 0.3);
+    border: 1px solid transparent;
+    position: relative;
+  }
+  
+  .comment-indicator:hover {
+    background: rgba(14, 30, 47, 0.5);
+    border-color: var(--primary-accent-light);
+  }
+  
+  .comment-icon {
+    display: flex;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+  }
+  
+  .has-comment .comment-icon {
+    color: var(--primary-accent);
+  }
+  
+  .comment-preview-text {
+    font-size: 13px;
+    color: var(--text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .comment-add-text {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  
+  /* Enhanced Tooltip Styling */
+  .comment-tooltip-wrapper {
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%);
+    margin-top: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    pointer-events: none;
+  }
+  
+  .comment-cell:hover .comment-tooltip-wrapper {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  
+  .comment-tooltip-content {
+    min-width: 280px;
+    max-width: 400px;
+    background: linear-gradient(145deg, #112032, #0a1725);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(59, 173, 229, 0.2);
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .comment-tooltip-content::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: inherit;
+    border-left: 1px solid rgba(59, 173, 229, 0.2);
+    border-top: 1px solid rgba(59, 173, 229, 0.2);
+  }
+  
+  .tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(59, 173, 229, 0.1);
+  }
+  
+  .tooltip-header span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-light);
+  }
+  
+  .tooltip-edit-btn {
+    background: none;
+    border: none;
+    color: var(--primary-accent);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+  
+  .tooltip-edit-btn:hover {
+    background: rgba(59, 173, 229, 0.1);
+  }
+  
+  .tooltip-body {
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-light);
+    max-height: 200px;
+    overflow-y: auto;
+    word-break: break-word;
+  }
+  
+  /* Scrollbar styling for tooltip body */
+  .tooltip-body::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .tooltip-body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+  }
+  
+  .tooltip-body::-webkit-scrollbar-thumb {
+    background: rgba(59, 173, 229, 0.3);
+    border-radius: 2px;
+  }
+  
+  /* Ensure tooltip stays visible when scrolling */
+  .data-table-wrapper {
+    overflow: visible;
+  }
+  
+  .data-table {
+    overflow: visible;
+  }
   @media (max-width: 576px) {
     .fleet-header,
     .filter-bar,

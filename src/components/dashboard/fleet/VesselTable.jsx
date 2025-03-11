@@ -98,39 +98,64 @@ const VesselTable = ({
     );
   };
 
-  // Create comments column content
-  const commentsColumn = {
-    label: 'Comments',
-    width: '200px',
-    content: (vessel) => {
-      // Check if the vessel has comments
-      const hasComments = vessel.comments && vessel.comments.trim().length > 0;
-      
-      if (!hasComments) {
-        return (
-          <div className="remarks-empty" onClick={() => onOpenRemarks(vessel)}>
+  
+
+// In your VesselTable component
+// In your VesselTable component
+// In your VesselTable component
+const commentsColumn = {
+  label: 'Comments',
+  width: '180px',
+  content: (vessel) => {
+    const hasComments = vessel.comments && vessel.comments.trim().length > 0;
+    
+    return (
+      <div className="comment-cell">
+        <div 
+          className={`comment-indicator ${hasComments ? 'has-comment' : 'no-comment'}`}
+          onClick={() => onOpenRemarks(vessel)}
+        >
+          <div className="comment-icon">
             <MessageSquare size={16} />
-            <span>Add comment</span>
           </div>
-        );
-      }
-      
-      // Truncate long comments for display
-      const truncatedText = vessel.comments.length > 40 
-        ? `${vessel.comments.substring(0, 40)}...` 
-        : vessel.comments;
-      
-      return (
-        <div className="remarks-preview" onClick={() => onOpenRemarks(vessel)}>
-          <div className="remarks-count">
-            <MessageSquare size={16} />
-            <span>View/Edit</span>
-          </div>
-          <div className="remarks-text">{truncatedText}</div>
+          
+          {hasComments ? (
+            <div className="comment-preview-text">
+              {vessel.comments.length > 38 
+                ? `${vessel.comments.substring(0, 38)}...` 
+                : vessel.comments}
+            </div>
+          ) : (
+            <div className="comment-add-text">Add comment</div>
+          )}
         </div>
-      );
-    }
-  };
+
+        {/* Enhanced Tooltip */}
+        {hasComments && (
+          <div className="comment-tooltip-wrapper">
+            <div className="comment-tooltip-content">
+              <div className="tooltip-header">
+                <span>Comment</span>
+                <button 
+                  className="tooltip-edit-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenRemarks(vessel);
+                  }}
+                >
+                  Edit
+                </button>
+              </div>
+              <div className="tooltip-body">
+                {vessel.comments}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+};
 
   return (
     <Table
