@@ -8,7 +8,7 @@ import {
 import VesselTable from './VesselTable';
 import ArrivalsByPortChart from './charts/ArrivalsByPortChart';
 import ArrivalTimelineChart from './charts/ArrivalTimelineChart';
-import '../DashboardStyles.css';
+import './FleetStyles.css';
 import CommentsModal from './CommentsModal';
 
 const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {

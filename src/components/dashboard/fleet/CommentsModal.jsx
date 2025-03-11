@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, AlertTriangle } from 'lucide-react';
-import '../DashboardStyles.css';
+import './FleetStyles.css';
 
 const CommentsModal = ({ 
   isOpen, 
@@ -60,7 +60,7 @@ const CommentsModal = ({
       }
 
       // Production code path
-      const response = await fetch('/api/vessels/comments', {
+      const response = await fetch('https://qescpqp626isx43ab5mnlyvayi0zvvsg.lambda-url.ap-south-1.on.aws/api/vessels/comments', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
