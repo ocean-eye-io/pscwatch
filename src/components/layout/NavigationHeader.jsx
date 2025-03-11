@@ -1,20 +1,37 @@
 // src/components/layout/NavigationHeader.jsx
 import React, { useState } from 'react';
-import { Ship, Home, Anchor, BarChart2, Settings, Menu, X } from 'lucide-react';
+import { Ship, Home, Anchor, BarChart2, Settings, Menu, X, FileText } from 'lucide-react';
 import './NavigationStyles.css';
 
-const NavigationHeader = ({ activePage }) => {
+const NavigationHeader = ({ activePage, onNavigate }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const handleNavClick = (id, e) => {
+    e.preventDefault();
+    
+    // Map 'reports' to 'defects' for the defects dashboard
+    const pageId = id === 'reports' ? 'defects' : id;
+    
+    if (onNavigate) {
+      onNavigate(pageId);
+    }
+    
+    // Close sidebar on mobile if it's open
+    if (sidebarOpen) {
+      setSidebarOpen(false);
+    }
+  };
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <Home size={20} />, path: '/dashboard' },
-    //{ id: 'fleet', label: 'Fleet', icon: <Ship size={20} />, path: '/fleet' },
-    //{ id: 'ports', label: 'Ports', icon: <Anchor size={20} />, path: '/ports' },
+    { id: 'fleet', label: 'Fleet', icon: <Ship size={20} />, path: '/fleet' },
     { id: 'reports', label: 'Reports', icon: <BarChart2 size={20} />, path: '/reports' },
+    { id: 'reporting', label: 'Vessel Reporting', icon: <FileText size={20} />, path: '/reporting' },
+    //{ id: 'ports', label: 'Ports', icon: <Anchor size={20} />, path: '/ports' },
     //{ id: 'settings', label: 'Settings', icon: <Settings size={20} />, path: '/settings' }
   ];
 
@@ -41,11 +58,12 @@ const NavigationHeader = ({ activePage }) => {
             <a 
               key={item.id}
               href={item.path}
-              className={`nav-item ${activePage === item.id ? 'active' : ''}`}
+              className={`nav-item ${activePage === item.id || (item.id === 'reports' && activePage === 'defects') ? 'active' : ''}`}
+              onClick={(e) => handleNavClick(item.id, e)}
             >
               {item.icon}
               <span>{item.label}</span>
-              {activePage === item.id && <div className="active-indicator"></div>}
+              {(activePage === item.id || (item.id === 'reports' && activePage === 'defects')) && <div className="active-indicator"></div>}
             </a>
           ))}
         </nav>
@@ -71,7 +89,8 @@ const NavigationHeader = ({ activePage }) => {
             <a 
               key={item.id}
               href={item.path}
-              className={`sidebar-nav-item ${activePage === item.id ? 'active' : ''}`}
+              className={`sidebar-nav-item ${activePage === item.id || (item.id === 'reports' && activePage === 'defects') ? 'active' : ''}`}
+              onClick={(e) => handleNavClick(item.id, e)}
             >
               {item.icon}
               <span>{item.label}</span>

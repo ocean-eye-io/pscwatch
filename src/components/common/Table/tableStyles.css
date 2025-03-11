@@ -14,6 +14,27 @@
   --shadow-color: rgba(0, 0, 0, 0.3);
 }
 
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+.animate-zoomIn { animation: zoomIn 0.2s ease-out forwards; }
+.animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+/* Main table container */
 .data-table-container {
   background: var(--table-row-bg);
   border-radius: 8px;
@@ -21,12 +42,12 @@
   box-shadow: 0 6px 16px var(--shadow-color);
   border: 1px solid var(--table-border-color);
   margin-bottom: 1rem;
-  position: relative; /* For shadow effects */
-  transform-style: preserve-3d; /* For 3D effects */
+  position: relative;
+  transform-style: preserve-3d;
   perspective: 1000px;
+  width: 100%;
 }
 
-/* Add subtle 3D effect to the table container */
 .data-table-container::before {
   content: '';
   position: absolute;
@@ -40,22 +61,21 @@
   z-index: 1;
 }
 
+/* Scrollable wrapper */
 .data-table-wrapper {
   overflow-x: auto;
   border-radius: 8px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(244, 244, 244, 0.2) rgba(11, 22, 35, 0.5);
+  scrollbar-color: rgba(59, 173, 229, 0.3) rgba(11, 22, 35, 0.5);
   position: relative;
-  max-height: calc(100vh - 200px); /* Adjust this value as needed */
+  max-height: calc(100vh - 240px);
+  padding-bottom: 6px;
 }
 
-/* Custom scrollbar at the bottom of the page */
+/* Scrollbar styling */
 .data-table-wrapper::-webkit-scrollbar {
   height: 8px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
+  width: 8px;
 }
 
 .data-table-wrapper::-webkit-scrollbar-track {
@@ -73,42 +93,48 @@
   background-color: rgba(59, 173, 229, 0.5);
 }
 
+/* Table styling */
 .data-table {
   width: 100%;
   border-collapse: collapse;
   color: var(--table-text-color);
   font-family: 'Nunito', sans-serif;
   font-size: 12px;
+  table-layout: fixed;
 }
 
+/* Table header */
 .data-table thead {
   background: var(--table-header-bg);
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Shadow below header */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .data-table th {
-  padding: 8px 16px;
+  padding: 8px 12px;
   text-align: left;
   font-weight: 600;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Lighter border for header */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 12px;
   color: var(--table-text-color);
   height: 38px;
   box-sizing: border-box;
   vertical-align: middle;
-  position: relative; /* For interactive effects */
+  position: relative;
   transition: background-color 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .data-table th:hover {
-  background-color: rgba(59, 173, 229, 0.1); /* Subtle highlight on hover */
+  background-color: rgba(59, 173, 229, 0.1);
 }
 
-/* Add subtle 3D effect to header cells */
+/* 3D effect for header cells */
 .data-table th::after {
   content: '';
   position: absolute;
@@ -123,6 +149,7 @@
   );
 }
 
+/* Header content */
 .table-header-content {
   display: flex;
   align-items: center;
@@ -148,12 +175,13 @@
   opacity: 0.8;
 }
 
-/* Row Styles */
+/* Table rows */
 .data-row {
   transition: all 0.25s ease;
   background-color: var(--table-row-bg);
-  position: relative; /* For 3D effects */
+  position: relative;
   transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .data-row:nth-child(even) {
@@ -161,7 +189,7 @@
 }
 
 .data-row td {
-  padding: 6px 16px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--table-border-color);
   font-size: 12px;
   height: 36px;
@@ -169,6 +197,9 @@
   vertical-align: middle;
   white-space: nowrap;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;
 }
 
 .data-row:hover {
@@ -189,7 +220,19 @@
   z-index: 3;
 }
 
-/* Interactive Expand Button */
+.data-row.clickable {
+  cursor: pointer;
+}
+
+/* Cell content wrapper */
+.cell-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+/* Expand button */
 .expand-button {
   background: none;
   border: none;
@@ -232,7 +275,7 @@
   transform: scale(0.95);
 }
 
-/* Status Indicator with 3D effect */
+/* Status indicator */
 .status-indicator {
   display: flex;
   align-items: center;
@@ -242,6 +285,10 @@
   background: rgba(244, 244, 244, 0.05);
   transition: all 0.3s ease;
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .status-indicator:hover {
@@ -252,12 +299,13 @@
 .status-dot {
   width: 6px;
   height: 6px;
+  min-width: 6px;
   border-radius: 50%;
   transition: all 0.3s ease;
   box-shadow: 0 0 4px currentColor;
 }
 
-/* Action Button with 3D effect */
+/* Action button */
 .action-button {
   background: rgba(59, 173, 229, 0.1);
   border: 1px solid rgba(59, 173, 229, 0.2);
@@ -273,6 +321,7 @@
   position: relative;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
 }
 
 .action-button::before {
@@ -300,7 +349,14 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* Value Styles with glow effects */
+/* Actions cell */
+.actions-cell {
+  width: 80px;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Value styling */
 .positive-value {
   color: var(--positive-color);
   text-shadow: 0 0 8px rgba(46, 204, 113, 0.2);
@@ -316,16 +372,18 @@
   text-shadow: 0 0 8px rgba(241, 196, 15, 0.2);
 }
 
-/* Badge Styles with 3D effect */
+/* Badge styling */
 .badge {
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 4px;
   display: inline-block;
-  font-size: 12px;
+  font-size: 11px;
   text-align: center;
   position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
 .badge::before {
@@ -342,6 +400,11 @@
     rgba(255, 255, 255, 0) 100%
   );
   pointer-events: none;
+}
+
+.badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .badge-success {
@@ -368,7 +431,7 @@
   border: 1px solid rgba(52, 152, 219, 0.3);
 }
 
-/* Month Badge with 3D effects */
+/* Month badge */
 .month-badge {
   background: var(--blue-accent);
   color: white;
@@ -396,7 +459,7 @@
   pointer-events: none;
 }
 
-/* Date Display Cell - For handling date+badge combo seen in screenshots */
+/* Date display */
 .date-display {
   display: flex;
   flex-direction: column;
@@ -404,7 +467,7 @@
   line-height: 1.2;
 }
 
-/* Expanded Content with 3D effect */
+/* Expanded content */
 .expanded-content {
   background: linear-gradient(145deg, rgba(19, 35, 55, 0.5), rgba(26, 44, 68, 0.5));
   padding: 16px;
@@ -413,6 +476,7 @@
   box-shadow: inset 0 1px 10px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .expanded-content::before {
@@ -435,6 +499,7 @@
   gap: 16px;
 }
 
+/* Expanded items */
 .expanded-item {
   background: rgba(11, 22, 35, 0.3);
   padding: 12px;
@@ -480,31 +545,15 @@
   font-weight: 500;
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.expanded-content {
-  animation: fadeIn 0.3s ease-out;
-}
-
 /* Extra compact styles */
 .data-table.extra-compact td {
-  padding: 4px 16px;
+  padding: 4px 12px;
   height: 32px;
   font-size: 12px;
 }
 
 .data-table.extra-compact th {
-  padding: 6px 16px;
+  padding: 6px 12px;
   height: 34px;
   font-size: 12px;
 }
@@ -514,7 +563,7 @@
   font-size: 10px;
 }
 
-/* Fix for horizontal scrollbar always visible at page bottom */
+/* Horizontal scrollbar fix */
 .horizontal-scroll-container {
   position: fixed;
   bottom: 0;
@@ -525,18 +574,55 @@
   background: rgba(11, 22, 35, 0.5);
 }
 
-/* Responsive Design */
+/* Dialog scrollable content */
+.dialog-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 173, 229, 0.3) rgba(11, 22, 35, 0.5);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.dialog-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dialog-scroll::-webkit-scrollbar-track {
+  background: rgba(11, 22, 35, 0.5);
+  border-radius: 4px;
+}
+
+.dialog-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(59, 173, 229, 0.3);
+  border-radius: 4px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+.dialog-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(59, 173, 229, 0.5);
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .data-table {
-    font-size: 12px;
+    font-size: 11px;
   }
   
   .data-table td,
   .data-table th {
-    padding: 6px 12px;
+    padding: 4px 8px;
   }
   
   .expanded-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .badge, .status-indicator {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  
+  /* Mobile hiding class */
+  .mobile-hide {
+    display: none !important;
   }
 }

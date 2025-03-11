@@ -1,9 +1,10 @@
-// src/components/manager/Charts/ArrivalTimelineChart.jsx
+
 
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, LabelList, ResponsiveContainer } from 'recharts';
 import { Download, Maximize2, Minimize2 } from 'lucide-react';
-import './styles/chartStyles.css';
+//import ResponsiveChartContainer from '../../../common/charts/ResponsiveChartContainer';
+import '../../../common/charts/styles/chartStyles.css';
 
 const ArrivalTimelineChart = ({ data }) => {
   const [isActive, setIsActive] = useState(false);

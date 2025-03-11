@@ -9,7 +9,8 @@ const TableRow = ({
   onToggleExpand, 
   expandedContent,
   actions,
-  onRowClick
+  onRowClick,
+  rowHeight = '36px'
 }) => {
   const renderCellContent = (column, value) => {
     // If the column has a custom renderer, use it
@@ -26,13 +27,11 @@ const TableRow = ({
       return value ? 'Yes' : 'No';
     }
     
-    // Handle Date objects safely
     if (value instanceof Date) {
       return value.toLocaleString();
     }
     
-    // Ensure we return a string
-    return String(value);
+    return value.toString();
   };
 
   return (
@@ -40,9 +39,10 @@ const TableRow = ({
       <tr 
         className={`data-row ${isExpanded ? 'expanded' : ''} ${onRowClick ? 'clickable' : ''}`}
         onClick={onRowClick}
+        style={{ height: rowHeight }}
       >
         {expandedContent && (
-          <td>
+          <td key="expand-button-cell">
             <button
               className="expand-button"
               onClick={(e) => {
@@ -61,26 +61,35 @@ const TableRow = ({
         
         {columns.map((column) => (
           <td 
-            key={column.field} 
+            key={`cell-${column.field}`}
             className={column.cellClassName ? 
               (typeof column.cellClassName === 'function' ? 
                 column.cellClassName(rowData[column.field], rowData) : 
                 column.cellClassName) : 
               ''}
+            style={{
+              maxWidth: column.maxWidth || column.width,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              ...(column.cellStyle ? (typeof column.cellStyle === 'function' ? 
+                column.cellStyle(rowData[column.field], rowData) : 
+                column.cellStyle) : {})
+            }}
           >
             {renderCellContent(column, rowData[column.field])}
           </td>
         ))}
 
         {actions && (
-          <td className="actions-cell">
+          <td key="actions-cell" className="actions-cell">
             {actions}
           </td>
         )}
       </tr>
 
       {isExpanded && expandedContent && (
-        <tr className="expanded-row">
+        <tr key="expanded-row" className="expanded-row">
           <td colSpan={columns.length + (actions ? 2 : 1)}>
             <div className="expanded-content">
               {expandedContent}

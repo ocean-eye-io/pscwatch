@@ -20,6 +20,7 @@ const Table = ({
     key: defaultSortKey, 
     direction: defaultSortDirection 
   });
+  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 50 });
   const tableWrapperRef = useRef(null);
   const [scrollData, setScrollData] = useState({
     scrollWidth: 0,
@@ -44,7 +45,7 @@ const Table = ({
     }));
   };
 
-  // Monitor the table's scroll position and sync with bottom scrollbar
+  // Monitor the table's scroll position and implement virtual scrolling
   useEffect(() => {
     const tableWrapper = tableWrapperRef.current;
     if (!tableWrapper) return;
@@ -55,6 +56,22 @@ const Table = ({
         scrollLeft: tableWrapper.scrollLeft,
         clientWidth: tableWrapper.clientWidth
       });
+      
+      // Implement a simple virtualization approach
+      if (data.length > 100) {
+        const scrollTop = tableWrapper.scrollTop;
+        const viewportHeight = tableWrapper.clientHeight;
+        const rowHeight = 36; // Adjust this to match your actual row height
+        
+        // Calculate visible range with buffer rows for smooth scrolling
+        const start = Math.max(0, Math.floor(scrollTop / rowHeight) - 20);
+        const visibleRows = Math.ceil(viewportHeight / rowHeight) + 40;
+        const end = Math.min(data.length, start + visibleRows);
+        
+        setVisibleRange({ start, end });
+      } else {
+        setVisibleRange({ start: 0, end: data.length });
+      }
     };
 
     // Update scroll data on mount and when table size changes
@@ -71,7 +88,7 @@ const Table = ({
       tableWrapper.removeEventListener('scroll', handleScroll);
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [data.length]);
 
   // Handle scrolling from the bottom scrollbar
   const handleBottomScroll = (e) => {
@@ -114,6 +131,11 @@ const Table = ({
     });
   }, [data, sortConfig]);
 
+  // Get visible subset of data to render
+  const visibleData = useMemo(() => {
+    return sortedData.slice(visibleRange.start, visibleRange.end);
+  }, [sortedData, visibleRange]);
+
   // Calculate if table needs horizontal scrolling
   const needsScroll = scrollData.scrollWidth > scrollData.clientWidth;
   
@@ -122,6 +144,11 @@ const Table = ({
     ? (scrollData.scrollLeft / (scrollData.scrollWidth - scrollData.clientWidth)) * 100 
     : 0;
 
+  // Calculate total height for spacer elements to maintain scrollbar size
+  const totalHeight = data.length * parseInt(rowHeight);
+  const topSpacerHeight = visibleRange.start * parseInt(rowHeight);
+  const bottomSpacerHeight = (data.length - visibleRange.end) * parseInt(rowHeight);
+
   return (
     <>
       <div className={`data-table-container ${className}`}>
@@ -129,62 +156,74 @@ const Table = ({
           className="data-table-wrapper"
           ref={tableWrapperRef}
         >
-          <table className="data-table">
-            <thead>
-              <tr>
-                {expandedContent && <th style={{ width: '40px' }}></th>}
-                {columns.map((column) => (
-                  <th 
-                    key={column.field}
-                    style={{ 
-                      width: column.width,
-                      minWidth: column.minWidth,
-                      ...(column.style || {})
-                    }}
-                    onClick={() => column.sortable !== false && handleSort(column.field)}
-                  >
-                    <div className="table-header-content">
-                      {column.label}
-                      {column.sortable !== false && sortConfig.key === column.field && (
-                        <ChevronDown 
-                          size={16} 
-                          className="sort-icon"
-                          style={{ 
-                            transform: sortConfig.direction === 'desc' ? 'rotate(180deg)' : 'none',
-                          }} 
-                        />
-                      )}
-                    </div>
-                  </th>
-                ))}
-                {actions && <th style={{ width: actions.width || '120px' }}>{actions.label || 'Actions'}</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {sortedData.length > 0 ? (
-                sortedData.map((rowData) => (
-                  <TableRow
-                    key={rowData[uniqueIdField]}
-                    rowData={rowData}
-                    columns={columns}
-                    isExpanded={expandedRows.has(rowData[uniqueIdField])}
-                    onToggleExpand={() => toggleRowExpansion(rowData[uniqueIdField])}
-                    expandedContent={expandedContent ? expandedContent(rowData) : null}
-                    actions={actions ? actions.content(rowData) : null}
-                    rowHeight={rowHeight}
-                  />
-                ))
-              ) : (
+          <div style={{ height: totalHeight, position: 'relative' }}>
+            {/* Top spacer */}
+            {topSpacerHeight > 0 && (
+              <div style={{ height: `${topSpacerHeight}px` }} />
+            )}
+            
+            <table className="data-table" style={{ position: topSpacerHeight > 0 ? 'absolute' : 'relative', top: topSpacerHeight > 0 ? `${topSpacerHeight}px` : 0, width: '100%' }}>
+              <thead>
                 <tr>
-                  <td colSpan={columns.length + (expandedContent ? 1 : 0) + (actions ? 1 : 0)}>
-                    <div style={{ padding: '16px', textAlign: 'center', color: 'var(--table-muted-text-color)' }}>
-                      {emptyMessage}
-                    </div>
-                  </td>
+                  {expandedContent && <th key="expand-header" style={{ width: '40px' }}></th>}
+                  {columns.map((column) => (
+                    <th 
+                      key={`header-${column.field}`}  // Add this unique key
+                      style={{ 
+                        width: column.width,
+                        minWidth: column.minWidth,
+                        ...(column.style || {})
+                      }}
+                      onClick={() => column.sortable !== false && handleSort(column.field)}
+                    >
+                      <div className="table-header-content">
+                        {column.label}
+                        {column.sortable !== false && sortConfig.key === column.field && (
+                          <ChevronDown 
+                            size={16} 
+                            className="sort-icon"
+                            style={{ 
+                              transform: sortConfig.direction === 'desc' ? 'rotate(180deg)' : 'none',
+                            }} 
+                          />
+                        )}
+                      </div>
+                    </th>
+                  ))}
+                  {actions && <th key="actions-header" style={{ width: actions.width || '120px' }}>{actions.label || 'Actions'}</th>}
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {visibleData.length > 0 ? (
+                  visibleData.map((rowData) => (
+                    <TableRow
+                      key={rowData[uniqueIdField]}
+                      rowData={rowData}
+                      columns={columns}
+                      isExpanded={expandedRows.has(rowData[uniqueIdField])}
+                      onToggleExpand={() => toggleRowExpansion(rowData[uniqueIdField])}
+                      expandedContent={expandedContent ? expandedContent(rowData) : null}
+                      actions={actions ? actions.content(rowData) : null}
+                      rowHeight={rowHeight}
+                    />
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={columns.length + (expandedContent ? 1 : 0) + (actions ? 1 : 0)}>
+                      <div style={{ padding: '16px', textAlign: 'center', color: 'var(--table-muted-text-color)' }}>
+                        {emptyMessage}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            
+            {/* Bottom spacer */}
+            {bottomSpacerHeight > 0 && (
+              <div style={{ height: `${bottomSpacerHeight}px` }} />
+            )}
+          </div>
         </div>
       </div>
       

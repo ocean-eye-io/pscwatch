@@ -1,9 +1,9 @@
-// src/components/manager/Charts/ArrivalsByPortChart.jsx
+
 
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import ResponsiveChartContainer from './ResponsiveChartContainer';
-import './styles/chartStyles.css';
+import ResponsiveChartContainer from '../../../common/charts/ResponsiveChartContainer';
+import '../../../common/charts/styles/chartStyles.css';
 
 const ArrivalsByPortChart = ({ data }) => {
   const [hoveredBar, setHoveredBar] = useState(null);

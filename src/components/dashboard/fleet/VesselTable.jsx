@@ -1,15 +1,17 @@
-// src/components/manager/VesselTable/VesselTable.jsx
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
-import { 
-  Table, 
-  StatusIndicator, 
-  TableBadge, 
-  ExpandedItem, 
-  ActionButton 
+import {
+  Table,
+  StatusIndicator,
+  TableBadge,
+  ExpandedItem
 } from '../../common/Table';
 
-const VesselTable = ({ vessels, onOpenInstructions, fieldMappings }) => {
+const VesselTable = ({ 
+  vessels, 
+  onOpenRemarks, 
+  fieldMappings 
+}) => {
   // Helper function to get status color based on vessel status
   const getStatusColor = (status) => {
     if (!status) return '#f4f4f4';
@@ -37,7 +39,7 @@ const VesselTable = ({ vessels, onOpenInstructions, fieldMappings }) => {
   // Convert field mappings to table columns format
   const getTableColumns = () => {
     return Object.entries(fieldMappings.TABLE)
-      .filter(([_, field]) => !field.isAction)
+      .filter(([fieldId, field]) => !field.isAction && fieldId !== 'comments') // Exclude comments from main columns
       .sort((a, b) => a[1].priority - b[1].priority)
       .map(([fieldId, field]) => ({
         field: field.dbField,
@@ -49,8 +51,8 @@ const VesselTable = ({ vessels, onOpenInstructions, fieldMappings }) => {
           if (fieldId === 'event_type') {
             return (
               <StatusIndicator 
-                status={value} 
-                color={getStatusColor(value)} 
+                status={value}
+                color={getStatusColor(value)}
               />
             );
           }
@@ -96,18 +98,38 @@ const VesselTable = ({ vessels, onOpenInstructions, fieldMappings }) => {
     );
   };
 
-  // Create actions content
-  const actions = {
-    label: 'Actions',
-    width: '120px',
-    content: (vessel) => (
-      <ActionButton
-        onClick={() => onOpenInstructions(vessel)}
-        icon={<MessageSquare />}
-      >
-        Instructions
-      </ActionButton>
-    )
+  // Create comments column content
+  const commentsColumn = {
+    label: 'Comments',
+    width: '200px',
+    content: (vessel) => {
+      // Check if the vessel has comments
+      const hasComments = vessel.comments && vessel.comments.trim().length > 0;
+      
+      if (!hasComments) {
+        return (
+          <div className="remarks-empty" onClick={() => onOpenRemarks(vessel)}>
+            <MessageSquare size={16} />
+            <span>Add comment</span>
+          </div>
+        );
+      }
+      
+      // Truncate long comments for display
+      const truncatedText = vessel.comments.length > 40 
+        ? `${vessel.comments.substring(0, 40)}...` 
+        : vessel.comments;
+      
+      return (
+        <div className="remarks-preview" onClick={() => onOpenRemarks(vessel)}>
+          <div className="remarks-count">
+            <MessageSquare size={16} />
+            <span>View/Edit</span>
+          </div>
+          <div className="remarks-text">{truncatedText}</div>
+        </div>
+      );
+    }
   };
 
   return (
@@ -115,7 +137,7 @@ const VesselTable = ({ vessels, onOpenInstructions, fieldMappings }) => {
       data={vessels}
       columns={getTableColumns()}
       expandedContent={renderExpandedContent}
-      actions={actions}
+      actions={commentsColumn}
       uniqueIdField="imo_no"
       defaultSortKey="eta"
       defaultSortDirection="desc"
