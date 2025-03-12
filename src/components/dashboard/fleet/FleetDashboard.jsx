@@ -1,9 +1,8 @@
 // src/components/dashboard/fleet/FleetDashboard.jsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
-  Search, Calendar, Filter, Download, 
-  RefreshCw, Map, Ship, AlertTriangle,
-  Check, X
+  Search, Filter, Download, 
+  RefreshCw, Map, Ship, AlertTriangle
 } from 'lucide-react';
 import VesselTable from './VesselTable';
 import ArrivalsByPortChart from './charts/ArrivalsByPortChart';
@@ -19,22 +18,23 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // New multi-select state variables
+  // Filter state variables
   const [portFilters, setPortFilters] = useState([]);
   const [statusFilters, setStatusFilters] = useState([]);
   const [docFilters, setDocFilters] = useState([]);
   const [voyageStatusFilter, setVoyageStatusFilter] = useState('Current Voyages');
   
-  // Manage dropdown visibility
+  // Dropdown visibility state
+  const [showVoyageStatusDropdown, setShowVoyageStatusDropdown] = useState(false);
   const [showPortDropdown, setShowPortDropdown] = useState(false);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [showDocDropdown, setShowDocDropdown] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [selectedVessel, setSelectedVessel] = useState(null);
-  // Add this with your other state variables
-  const [showVoyageStatusDropdown, setShowVoyageStatusDropdown] = useState(false);
+  
   const handleOpenComments = (vessel) => {
     setSelectedVessel(vessel);
     setCommentModalOpen(true);
@@ -56,7 +56,7 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
   // API endpoint
   const API_URL = 'https://qescpqp626isx43ab5mnlyvayi0zvvsg.lambda-url.ap-south-1.on.aws/api/vessels';
 
-  // Process and filter vessels data - memoized to improve performance
+  // Process and filter vessels data
   const processVesselsData = useCallback((data) => {
     // Get the latest record for each IMO number based on dwh_load_date
     const latestVesselData = {};
@@ -77,7 +77,6 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
     
     // Convert back to array
     const uniqueVessels = Object.values(latestVesselData);
-    console.log('Filtered to latest records by IMO:', uniqueVessels.length);
     
     // Filter vessels to only include those in port or arriving today or in the future
     const currentDate = new Date();
@@ -127,7 +126,7 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
       });
   }, []);
 
-  // Sort vessels data - memoized to improve performance
+  // Sort vessels data
   const sortVesselsData = useCallback((processedData) => {
     return [...processedData].sort((a, b) => {
       // In-port vessels should be at the top
@@ -162,11 +161,9 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
       }
       
       let data = await response.json();
-      console.log('Raw vessel data loaded:', data.length);
       
       // Process the data
       const processedData = processVesselsData(data);
-      console.log('Filtered to in-port or future vessels:', processedData.length);
       
       // Sort the data
       const sortedData = sortVesselsData(processedData);
@@ -259,7 +256,6 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
       );
     }
     
-    console.log('Filtered vessels:', results.length);
     setFilteredVessels(results);
   }, [vessels, searchTerm, portFilters, statusFilters, docFilters, voyageStatusFilter]);
 
@@ -321,34 +317,15 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
     }
   };
 
-  // Get unique arrival ports for filter dropdown - memoized to improve performance
-  const uniquePorts = useMemo(() => {
-    if (!vessels.length) return [];
-    
-    return [...new Set(vessels.map(v => v.arrival_port).filter(Boolean))];
-  }, [vessels]);
+  // Utility memoized values
+  const uniquePorts = useMemo(() => [...new Set(vessels.map(v => v.arrival_port).filter(Boolean))], [vessels]);
+  const uniqueStatuses = useMemo(() => [...new Set(vessels.map(v => v.event_type).filter(Boolean))], [vessels]);
+  const uniqueDocs = useMemo(() => [...new Set(vessels.map(v => v.office_doc).filter(Boolean))], [vessels]);
+  const highRiskCount = useMemo(() => vessels.filter(v => v.riskScore > 70).length, [vessels]);
+  const vesselCount = vessels.length;
+  const filteredCount = filteredVessels.length;
 
-  // Get unique event types for filter dropdown - memoized to improve performance
-  const uniqueStatuses = useMemo(() => {
-    if (!vessels.length) return [];
-    
-    return [...new Set(vessels.map(v => v.event_type).filter(Boolean))];
-  }, [vessels]);
-  
-  // Get unique DOC offices for filter dropdown - memoized to improve performance
-  const uniqueDocs = useMemo(() => {
-    if (!vessels.length) return [];
-    
-    return [...new Set(vessels.map(v => v.office_doc).filter(Boolean))];
-  }, [vessels]);
-    
-  // Count high risk vessels - memoized to improve performance
-  const highRiskCount = useMemo(() => 
-    vessels.filter(v => v.riskScore > 70).length, 
-    [vessels]
-  );
-
-  // Process data for Vessels by Port chart - memoized to improve performance
+  // Chart data
   const vesselsByPortData = useMemo(() => {
     if (!vessels.length) return [];
     
@@ -359,7 +336,6 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
       }
     });
     
-    // Convert to format expected by your ArrivalsByPortChart component
     return Object.entries(portCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
@@ -369,7 +345,6 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
       }));
   }, [vessels]);
 
-  // Process data for Arrival Timeline chart - memoized to improve performance
   const arrivalTimelineData = useMemo(() => {
     if (!vessels.length) return [];
     
@@ -402,67 +377,72 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
     ).length;
     
     return [
-      { range: 'In Port', vessels: inPort, color: '#2ECC71' },
-      { range: 'Today', vessels: arrivingToday, color: '#E74C3C' },
-      { range: 'This Week', vessels: arrivingThisWeek, color: '#F1C40F' },
-      { range: 'Later', vessels: arrivingLater, color: '#3BADE5' }
+      { range: 'In Port', vessels: inPort, color: '#2EE086' },
+      { range: 'Today', vessels: arrivingToday, color: '#FF5252' },
+      { range: 'This Week', vessels: arrivingThisWeek, color: '#FFD426' },
+      { range: 'Later', vessels: arrivingLater, color: '#4DC3FF' }
     ];
   }, [vessels]);
 
-  // Get vessel count safely
-  const vesselCount = vessels.length;
-  const filteredCount = filteredVessels.length;
+  // Close all dropdowns when clicking elsewhere
+  const closeAllDropdowns = () => {
+    setShowVoyageStatusDropdown(false);
+    setShowPortDropdown(false);
+    setShowStatusDropdown(false);
+    setShowDocDropdown(false);
+    setShowSearch(false);
+  };
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <div className="dashboard-title">
-          <h1>Fleet Overview</h1>
-          <div className="fleet-stats">
-            <div className="fleet-count">
-              <Ship size={16} />
-              <span>{vesselCount} Vessels</span>
-            </div>
-            <div className="alert-count warning">
-              <AlertTriangle size={16} />
-              <span>{highRiskCount} High Risk</span>
-            </div>
+    <div className="dashboard-container" onClick={closeAllDropdowns}>
+      <div className="filter-bar">
+        <div className="filter-section-left">
+          <h1 className="dashboard-title">Fleet</h1>
+          <div className="vessel-counter">
+            <Ship size={14} />
+            <span>{vesselCount}</span>
+            {highRiskCount > 0 && (
+              <div className="risk-badge">
+                <AlertTriangle size={10} />
+                <span>{highRiskCount}</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Search control - Now in the left section */}
+          <div className="search-container">
+            <button 
+              className="search-toggle" 
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowSearch(!showSearch);
+              }}
+            >
+              <Search size={14} />
+            </button>
+            
+            {showSearch && (
+              <div className="search-popup" onClick={(e) => e.stopPropagation()}>
+                <input 
+                  type="text" 
+                  placeholder="Search vessels, IMO, ports..." 
+                  className="search-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            )}
           </div>
         </div>
         
-        <div className="dashboard-controls">
-          <div className="search-container">
-            <Search size={18} className="search-icon" />
-            <input 
-              type="text" 
-              placeholder="Search vessels, IMO, ports..." 
-              className="search-input"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          <div className="control-buttons">
-            <button className="control-btn refresh-btn" onClick={fetchVessels} title="Refresh data">
-              <RefreshCw size={16} className={loading ? "spinning" : ""} />
-            </button>
-            <button className="control-btn export-btn" title="Export data">
-              <Download size={16} />
-            </button>
-          </div>
-        </div>
-      </div>
-      
-           
-
-      <div className="filter-bar">
         <div className="filter-label">
-          <Filter size={16} />
+          <Filter size={14} />
         </div>
         
         <div className="filter-chips">
           {/* Voyage Status Filter Dropdown */}
-          <div className="filter-dropdown-container">
+          <div className="filter-dropdown-container" onClick={(e) => e.stopPropagation()}>
             <button 
               className={`filter-dropdown-button ${showVoyageStatusDropdown ? 'active' : ''}`}
               onClick={() => {
@@ -529,7 +509,7 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
           </div>
           
           {/* Port Filter Dropdown */}
-          <div className="filter-dropdown-container">
+          <div className="filter-dropdown-container" onClick={(e) => e.stopPropagation()}>
             <button 
               className={`filter-dropdown-button ${showPortDropdown ? 'active' : ''}`}
               onClick={() => {
@@ -578,7 +558,7 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
           </div>
           
           {/* Status Filter Dropdown */}
-          <div className="filter-dropdown-container">
+          <div className="filter-dropdown-container" onClick={(e) => e.stopPropagation()}>
             <button 
               className={`filter-dropdown-button ${showStatusDropdown ? 'active' : ''}`}
               onClick={() => {
@@ -627,7 +607,7 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
           </div>
           
           {/* DOC Filter Dropdown */}
-          <div className="filter-dropdown-container">
+          <div className="filter-dropdown-container" onClick={(e) => e.stopPropagation()}>
             <button 
               className={`filter-dropdown-button ${showDocDropdown ? 'active' : ''}`}
               onClick={() => {
@@ -681,15 +661,23 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
           </button>
         </div>
         
-        <button className="map-toggle">
-          <Map size={16} />
-          <span>Map</span>
-        </button>
+        <div className="filter-section-right">
+          <button className="control-btn refresh-btn" onClick={fetchVessels} title="Refresh data">
+            <RefreshCw size={14} className={loading ? "spinning" : ""} />
+          </button>
+          <button className="control-btn export-btn" title="Export data">
+            <Download size={14} />
+          </button>
+          <button className="map-toggle">
+            <Map size={14} />
+            <span>Map</span>
+          </button>
+        </div>
       </div>
       
       {error && (
         <div className="error-message">
-          <AlertTriangle size={18} />
+          <AlertTriangle size={16} />
           <span>{error}</span>
         </div>
       )}
@@ -749,6 +737,7 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
           Data sources: AIS, Port Authorities, Weather API
         </div>
       </div>
+      
       <CommentsModal
         isOpen={commentModalOpen}
         onClose={() => setCommentModalOpen(false)}
