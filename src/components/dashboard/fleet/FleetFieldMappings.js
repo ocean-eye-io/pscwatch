@@ -5,13 +5,13 @@ export const fleetFieldMappings = {
       dbField: 'vessel_name',
       label: 'Vessel',
       priority: 1,
-      width: '180px'
+      width: '160px'
     },
     imo: {
       dbField: 'imo_no',
       label: 'IMO No',
       priority: 2,
-      width: '120px'
+      width: '80px'
     },
     owner: {
       dbField: 'owner',
@@ -35,7 +35,8 @@ export const fleetFieldMappings = {
       dbField: 'departure_date',
       label: 'Departure Date',
       priority: 6,
-      width: '150px'
+      width: '120px',
+      type: 'date'
     },
     arrival_port: {
       dbField: 'arrival_port',
@@ -53,13 +54,16 @@ export const fleetFieldMappings = {
       dbField: 'eta',
       label: 'ETA',
       priority: 9,
-      width: '170px'
+      width: '170px',
+      type: 'datetime'
+
     },
     etb: {
       dbField: 'etb',
       label: 'ETB',
       priority: 10,
-      width: '150px'
+      width: '150px',
+      type: 'date'
     },
     checklist_received: {
       dbField: 'checklist_received',
@@ -86,28 +90,33 @@ export const fleetFieldMappings = {
     etd: {
       dbField: 'etd',
       label: 'ETD',
-      priority: 6
+      priority: 6,
+      type: 'datetime'
     },
     atd: {
       dbField: 'atd',
       label: 'ATD',
-      priority: 7
+      priority: 7,
+      type: 'datetime'
     },
     
     psc_last_inspection_date: {
       dbField: 'psc_last_inspection_date',
       label: 'PSC Last Inspection Date',
-      priority: 10
+      priority: 10,
+      type: 'date'
     },
     psc_last_inspection_port: {
       dbField: 'psc_last_inspection_port',
       label: 'PSC Last Inspection Port',
       priority: 11
+      
     },
     amsa_last_inspection_date: {
       dbField: 'amsa_last_inspection_date',
       label: 'AMSA Last Inspection Date',
-      priority: 12
+      priority: 12,
+      type: 'date'
     },
     amsa_last_inspection_port: {
       dbField: 'amsa_last_inspection_port',

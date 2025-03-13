@@ -14,6 +14,37 @@ const VesselTable = ({
   fieldMappings,
   onUpdateVessel // Add this prop to handle vessel updates
 }) => {
+  // Enhanced format function that can handle both date and date+time
+  const formatDateTime = (dateString, includeTime = false) => {
+    if (!dateString) return '-';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString; // Return original if invalid
+      
+      if (includeTime) {
+        // Format as "Month Day, Year, HH:MM"
+        return date.toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      } else {
+        // Format as "Month Day, Year"
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      }
+    } catch (error) {
+      return dateString; // Return original on error
+    }
+  };
+
   // Helper function to get status color based on vessel status
   const getStatusColor = (status) => {
     if (!status) return '#f4f4f4';
@@ -71,6 +102,22 @@ const VesselTable = ({
             );
           }
           
+          // Special rendering for date fields
+          if (field.type === 'date') {
+            return formatDateTime(value, false); // Format as date only
+          }
+          
+          // Special rendering for date-time fields
+          if (
+            fieldId === 'eta' || 
+            fieldId === 'etb' || 
+            fieldId === 'etd' || 
+            fieldId === 'atd' ||
+            fieldId === 'psc_last_inspection_date'
+          ) {
+            return formatDateTime(value, true); // Format as date and time
+          }
+          
           // Special rendering for days to go
           if (fieldId === 'daysToGo' && typeof value === 'number') {
             return value.toFixed(1);
@@ -100,13 +147,27 @@ const VesselTable = ({
       
     return (
       <div className="expanded-grid">
-        {expandedColumns.map(([fieldId, field]) => (
-          <ExpandedItem
-            key={fieldId}
-            label={field.label}
-            value={vessel[field.dbField]}
-          />
-        ))}
+        {expandedColumns.map(([fieldId, field]) => {
+          let value = vessel[field.dbField];
+          
+          // Format date values in expanded panel
+          if (field.type === 'date') {
+            value = formatDateTime(value, false);
+          } else if (
+            fieldId === 'etd' || 
+            fieldId === 'atd'
+          ) {
+            value = formatDateTime(value, true);
+          }
+          
+          return (
+            <ExpandedItem
+              key={fieldId}
+              label={field.label}
+              value={value}
+            />
+          );
+        })}
       </div>
     );
   };
