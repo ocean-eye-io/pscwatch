@@ -188,10 +188,10 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName }) => {
                       <p className="alert-item-description">{alert.description}</p>
                       
                       <div className="alert-item-metadata" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '10px', fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {/* <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <Clock size={12} />
                           <span>{alert.timeDetected}</span>
-                        </div>
+                        </div> */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <Shield size={12} />
                           <span>{alert.recommendation}</span>
@@ -202,9 +202,9 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName }) => {
                         <button className="alert-action-button">
                           Take Action
                         </button>
-                        <button className="alert-action-button" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: '#f4f4f4' }}>
+                        {/* <button className="alert-action-button" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: '#f4f4f4' }}>
                           View Details <ChevronRight size={12} style={{ marginLeft: '2px' }} />
-                        </button>
+                        </button> */}
                       </div>
                     </li>
                   ))}

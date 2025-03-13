@@ -16,29 +16,115 @@ const VesselTable = ({
   fieldMappings,
   onUpdateVessel
 }) => {
-  // State for alert modal
   const [alertModalOpen, setAlertModalOpen] = useState(false);
   const [selectedVesselAlerts, setSelectedVesselAlerts] = useState(null);
-  
-  // Generate random alerts for each vessel (if not already present)
+
+  const getGlassyStatusStyle = (status) => {
+    const colors = {
+      'Completed': {
+        background: 'linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(46, 204, 113, 0.25))',
+        border: '1px solid rgba(46, 204, 113, 0.3)',
+        color: '#2ECC71',
+        boxShadow: '0 2px 12px rgba(46, 204, 113, 0.2), inset 0 1px rgba(255, 255, 255, 0.1)'
+      },
+      'In Progress': {
+        background: 'linear-gradient(135deg, rgba(241, 196, 15, 0.15), rgba(241, 196, 15, 0.25))',
+        border: '1px solid rgba(241, 196, 15, 0.3)',
+        color: '#F1C40F',
+        boxShadow: '0 2px 12px rgba(241, 196, 15, 0.2), inset 0 1px rgba(255, 255, 255, 0.1)'
+      },
+      'Pending': {
+        background: 'linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(231, 76, 60, 0.25))',
+        border: '1px solid rgba(231, 76, 60, 0.3)',
+        color: '#E74C3C',
+        boxShadow: '0 2px 12px rgba(231, 76, 60, 0.2), inset 0 1px rgba(255, 255, 255, 0.1)'
+      }
+    };
+
+    return {
+      ...colors[status],
+      padding: '4px 12px',
+      borderRadius: '6px',
+      fontWeight: '600',
+      fontSize: '12px',
+      display: 'inline-block',
+      backdropFilter: 'blur(8px)',
+      transform: 'translateZ(0)',
+      transition: 'all 0.2s ease',
+      textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)'
+    };
+  };
+
+  const getPSCRiskStyle = (score) => {
+    let style = {
+      padding: '4px 12px',
+      borderRadius: '6px',
+      fontWeight: '600',
+      fontSize: '12px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      backdropFilter: 'blur(8px)',
+      transform: 'translateZ(0)',
+      transition: 'all 0.2s ease',
+      textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+      width: 'fit-content'
+    };
+
+    if (score < 60) {
+      return {
+        ...style,
+        background: 'linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(231, 76, 60, 0.25))',
+        border: '1px solid rgba(231, 76, 60, 0.3)',
+        color: '#E74C3C',
+        boxShadow: '0 2px 12px rgba(231, 76, 60, 0.2), inset 0 1px rgba(255, 255, 255, 0.1)'
+      };
+    } else if (score < 80) {
+      return {
+        ...style,
+        background: 'linear-gradient(135deg, rgba(241, 196, 15, 0.15), rgba(241, 196, 15, 0.25))',
+        border: '1px solid rgba(241, 196, 15, 0.3)',
+        color: '#F1C40F',
+        boxShadow: '0 2px 12px rgba(241, 196, 15, 0.2), inset 0 1px rgba(255, 255, 255, 0.1)'
+      };
+    } else {
+      return {
+        ...style,
+        background: 'linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(46, 204, 113, 0.25))',
+        border: '1px solid rgba(46, 204, 113, 0.3)',
+        color: '#2ECC71',
+        boxShadow: '0 2px 12px rgba(46, 204, 113, 0.2), inset 0 1px rgba(255, 255, 255, 0.1)'
+      };
+    }
+  };
+
+  // Generate random alerts and statuses for each vessel
   const vesselsWithAlerts = vessels.map(vessel => {
+    const statuses = ['Completed', 'In Progress', 'Pending'];
+    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+    const randomPSCScore = Math.floor(Math.random() * 100);
+
     if (!vessel.alerts) {
-      // Generate random alert counts
-      const redAlerts = Math.floor(Math.random() * 3); // 0-2 red alerts
-      const yellowAlerts = Math.floor(Math.random() * 4) + 1; // 1-4 yellow alerts
+      const redAlerts = Math.floor(Math.random() * 3);
+      const yellowAlerts = Math.floor(Math.random() * 4) + 1;
       
       return {
         ...vessel,
+        checklistStatus: randomStatus,
+        pscScore: randomPSCScore,
         alerts: {
           redAlerts,
           yellowAlerts
         }
       };
     }
-    return vessel;
+    return {
+      ...vessel,
+      checklistStatus: randomStatus,
+      pscScore: randomPSCScore
+    };
   });
-  
-  // Handler for opening alert modal
+
   const handleOpenAlertModal = (vessel) => {
     setSelectedVesselAlerts({
       vesselName: vessel.vessel_name,
@@ -46,17 +132,14 @@ const VesselTable = ({
     });
     setAlertModalOpen(true);
   };
-
-  // Enhanced format function that can handle both date and date+time
   const formatDateTime = (dateString, includeTime = false) => {
     if (!dateString) return '-';
     
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString; // Return original if invalid
+      if (isNaN(date.getTime())) return dateString;
       
       if (includeTime) {
-        // Format as "Month Day, Year, HH:MM"
         return date.toLocaleString('en-US', {
           year: 'numeric',
           month: 'short',
@@ -66,7 +149,6 @@ const VesselTable = ({
           hour12: true
         });
       } else {
-        // Format as "Month Day, Year"
         return date.toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'short',
@@ -74,27 +156,25 @@ const VesselTable = ({
         });
       }
     } catch (error) {
-      return dateString; // Return original on error
+      return dateString;
     }
   };
 
-  // Helper function to get status color based on vessel status
   const getStatusColor = (status) => {
     if (!status) return '#f4f4f4';
     
     const statusLower = status.toLowerCase();
     if (statusLower.includes('at sea') || statusLower.includes('transit')) {
-      return '#3498DB'; // Blue for at sea
+      return '#3498DB';
     } else if (statusLower.includes('port') || statusLower.includes('berth')) {
-      return '#2ECC71'; // Green for at port
+      return '#2ECC71';
     } else if (statusLower.includes('anchor')) {
-      return '#F1C40F'; // Yellow for at anchor
+      return '#F1C40F';
     } else {
-      return '#f4f4f4'; // Default
+      return '#f4f4f4';
     }
   };
 
-  // Helper function to get risk score color based on score value
   const getRiskScoreVariant = (score) => {
     if (!score && score !== 0) return 'info';
     if (score < 50) return 'success';
@@ -102,10 +182,9 @@ const VesselTable = ({
     return 'danger';
   };
 
-  // Convert field mappings to table columns format
   const getTableColumns = () => {
     const columns = Object.entries(fieldMappings.TABLE)
-      .filter(([fieldId, field]) => !field.isAction && fieldId !== 'comments') // Exclude comments from main columns
+      .filter(([fieldId, field]) => !field.isAction && fieldId !== 'comments')
       .sort((a, b) => a[1].priority - b[1].priority)
       .map(([fieldId, field]) => ({
         field: field.dbField,
@@ -113,7 +192,6 @@ const VesselTable = ({
         width: field.width,
         minWidth: field.minWidth,
         render: (value, rowData) => {
-          // Special rendering for event_type (status)
           if (fieldId === 'event_type') {
             return (
               <StatusIndicator 
@@ -123,7 +201,6 @@ const VesselTable = ({
             );
           }
           
-          // Special rendering for risk score
           if (fieldId === 'riskScore') {
             const score = value !== null && value !== undefined ? Math.round(value) : null;
             return (
@@ -135,12 +212,10 @@ const VesselTable = ({
             );
           }
           
-          // Special rendering for date fields
           if (field.type === 'date') {
-            return formatDateTime(value, false); // Format as date only
+            return formatDateTime(value, false);
           }
           
-          // Special rendering for date-time fields
           if (
             fieldId === 'eta' || 
             fieldId === 'etb' || 
@@ -148,15 +223,13 @@ const VesselTable = ({
             fieldId === 'atd' ||
             fieldId === 'psc_last_inspection_date'
           ) {
-            return formatDateTime(value, true); // Format as date and time
+            return formatDateTime(value, true);
           }
           
-          // Special rendering for days to go
           if (fieldId === 'daysToGo' && typeof value === 'number') {
             return value.toFixed(1);
           }
           
-          // Special rendering for checklist_received
           if (fieldId === 'checklist_received') {
             return (
               <CheckboxField 
@@ -167,11 +240,60 @@ const VesselTable = ({
             );
           }
           
-          // Default rendering
           return value === null || value === undefined ? '-' : value;
         }
       }));
-      
+
+    // Add Checklist Status column
+    columns.push({
+      field: 'checklistStatus',
+      label: 'Checklist Status',
+      width: '150px',
+      render: (value) => (
+        <div 
+          style={getGlassyStatusStyle(value)}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateZ(0) scale(1.02)';
+            e.currentTarget.style.boxShadow = e.currentTarget.style.boxShadow.replace('2px', '4px');
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateZ(0)';
+            e.currentTarget.style.boxShadow = e.currentTarget.style.boxShadow.replace('4px', '2px');
+          }}
+        >
+          {value || '-'}
+        </div>
+      )
+    });
+
+    // Add PSC Risk column
+    columns.push({
+      field: 'pscScore',
+      label: 'PSC Risk',
+      width: '150px',
+      render: (value) => {
+        const score = value !== null && value !== undefined ? Math.round(value) : null;
+        const riskLevel = score < 60 ? 'High' : score < 80 ? 'Medium' : 'Low';
+        
+        return (
+          <div 
+            style={getPSCRiskStyle(score)}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateZ(0) scale(1.02)';
+              e.currentTarget.style.boxShadow = e.currentTarget.style.boxShadow.replace('2px', '4px');
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateZ(0)';
+              e.currentTarget.style.boxShadow = e.currentTarget.style.boxShadow.replace('4px', '2px');
+            }}
+          >
+            <span>{riskLevel}</span>
+            <span style={{ opacity: 0.8 }}>({score})</span>
+          </div>
+        );
+      }
+    });
+
     // Add Alerts column
     columns.push({
       field: 'alerts',
@@ -190,7 +312,6 @@ const VesselTable = ({
     return columns;
   };
 
-  // Create expanded content renderer
   const renderExpandedContent = (vessel) => {
     const expandedColumns = Object.entries(fieldMappings.EXPANDED)
       .sort((a, b) => a[1].priority - b[1].priority);
@@ -200,7 +321,6 @@ const VesselTable = ({
         {expandedColumns.map(([fieldId, field]) => {
           let value = vessel[field.dbField];
           
-          // Format date values in expanded panel
           if (field.type === 'date') {
             value = formatDateTime(value, false);
           } else if (
@@ -248,7 +368,6 @@ const VesselTable = ({
               <div className="comment-add-text">Add comment</div>
             )}
 
-            {/* Tooltip moved inside the indicator */}
             {hasComments && (
               <div className="comment-tooltip">
                 <div className="comment-tooltip-content">

@@ -14,7 +14,7 @@ import MapModal from './MapModal';
 const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
   const filterConfig = {
     showVoyageStatusFilter: true,
-    showPortFilter: true,
+    showPortFilter: false,
     showStatusFilter: false, // Set to false to hide Status filter
     showDocFilter: false     // Set to false to hide DOC filter
   };
@@ -726,10 +726,10 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
             </div>
           )}  
           
-          {/* Reset Button */}
+          {/* Reset Button
           <button className="reset-button" onClick={resetFilters}>
             Reset
-          </button>
+          </button> */}
         </div>
         
         <div className="filter-section-right">

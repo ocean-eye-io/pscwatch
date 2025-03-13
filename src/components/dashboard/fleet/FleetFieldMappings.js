@@ -25,19 +25,19 @@ export const fleetFieldMappings = {
     //   priority: 4,
     //   width: '140px'
     // },
-    departure_port: {
-      dbField: 'departure_port',
-      label: 'Departure Port',
-      priority: 5,
-      width: '150px'
-    },
-    departure_date: {
-      dbField: 'departure_date',
-      label: 'Departure Date',
-      priority: 6,
-      width: '120px',
-      type: 'date'
-    },
+    // departure_port: {
+    //   dbField: 'departure_port',
+    //   label: 'Departure Port',
+    //   priority: 5,
+    //   width: '150px'
+    // },
+    // departure_date: {
+    //   dbField: 'departure_date',
+    //   label: 'Departure Date',
+    //   priority: 6,
+    //   width: '120px',
+    //   type: 'date'
+    // },
     arrival_port: {
       dbField: 'arrival_port',
       label: 'Arrival Port',
@@ -65,12 +65,12 @@ export const fleetFieldMappings = {
     //   width: '120px',
     //   type: 'date'
     // },
-    checklist_received: {
-      dbField: 'checklist_received',
-      label: 'Checklist Received',
-      priority: 10, // Adjust the priority as needed
-      width: '120px'
-    },
+    // checklist_received: {
+    //   dbField: 'checklist_received',
+    //   label: 'Checklist Status',
+    //   priority: 10, // Adjust the priority as needed
+    //   width: '120px'
+    // },
     comments: {
       dbField: 'comments',
       label: 'Comments',
