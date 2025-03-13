@@ -114,7 +114,7 @@ const ALERT_RECOMMENDATIONS = {
   ]
 };
 
-const AlertModal = ({ isOpen, onClose, alerts, vesselName }) => {
+const AlertModal = ({ isOpen, onClose, alerts, vesselName, pscScore }) => {
   const [visible, setVisible] = useState(false);
   
   useEffect(() => {
@@ -130,6 +130,44 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName }) => {
   if (!isOpen && !visible) {
     return null;
   }
+
+  const getPSCRiskStyle = (score) => {
+    const baseStyle = {
+      padding: '2px 8px',
+      borderRadius: '4px',
+      fontSize: '12px',
+      fontWeight: '600',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '4px'
+    };
+
+    if (score < 60) {
+      return {
+        ...baseStyle,
+        background: 'linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(231, 76, 60, 0.25))',
+        border: '1px solid rgba(231, 76, 60, 0.3)',
+        color: '#E74C3C',
+        boxShadow: '0 2px 12px rgba(231, 76, 60, 0.2), inset 0 1px rgba(255, 255, 255, 0.1)'
+      };
+    } else if (score < 80) {
+      return {
+        ...baseStyle,
+        background: 'linear-gradient(135deg, rgba(241, 196, 15, 0.15), rgba(241, 196, 15, 0.25))',
+        border: '1px solid rgba(241, 196, 15, 0.3)',
+        color: '#F1C40F',
+        boxShadow: '0 2px 12px rgba(241, 196, 15, 0.2), inset 0 1px rgba(255, 255, 255, 0.1)'
+      };
+    } else {
+      return {
+        ...baseStyle,
+        background: 'linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(46, 204, 113, 0.25))',
+        border: '1px solid rgba(46, 204, 113, 0.3)',
+        color: '#2ECC71',
+        boxShadow: '0 2px 12px rgba(46, 204, 113, 0.2), inset 0 1px rgba(255, 255, 255, 0.1)'
+      };
+    }
+  };
   
   return (
     <div 
@@ -141,10 +179,23 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="alert-modal-header">
-          <h3 className="alert-modal-title">
-            <AlertCircle size={24} color="#3BADE5" />
-            Alert Center: {vesselName || 'Vessel'}
-          </h3>
+          <div className="alert-modal-title-group" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertCircle size={24} color="#3BADE5" />
+              <h3 className="alert-modal-title">
+                Alert Center: {vesselName || 'Vessel'}
+              </h3>
+            </div>
+            {pscScore !== undefined && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '32px', fontSize: '13px' }}>
+                <span style={{ color: 'rgba(255,255,255,0.7)' }}>PSC Risk:</span>
+                <div style={getPSCRiskStyle(pscScore)}>
+                  <span>{pscScore < 60 ? 'High' : pscScore < 80 ? 'Medium' : 'Low'}</span>
+                  <span style={{ opacity: 0.8 }}>({Math.round(pscScore)})</span>
+                </div>
+              </div>
+            )}
+          </div>
           <button 
             className="alert-modal-close"
             onClick={onClose}
@@ -187,12 +238,12 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName }) => {
                       
                       <p className="alert-item-description">{alert.description}</p>
                       
-                      <div className="alert-item-metadata" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '10px', fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
-                        {/* <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <div className="alert-item-metadata">
+                        <div className="metadata-item">
                           <Clock size={12} />
                           <span>{alert.timeDetected}</span>
-                        </div> */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        </div>
+                        <div className="metadata-item">
                           <Shield size={12} />
                           <span>{alert.recommendation}</span>
                         </div>
@@ -202,9 +253,6 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName }) => {
                         <button className="alert-action-button">
                           Take Action
                         </button>
-                        {/* <button className="alert-action-button" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: '#f4f4f4' }}>
-                          View Details <ChevronRight size={12} style={{ marginLeft: '2px' }} />
-                        </button> */}
                       </div>
                     </li>
                   ))}
@@ -244,12 +292,12 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName }) => {
                       
                       <p className="alert-item-description">{alert.description}</p>
                       
-                      <div className="alert-item-metadata" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '10px', fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <div className="alert-item-metadata">
+                        <div className="metadata-item">
                           <Clock size={12} />
                           <span>{alert.timeDetected}</span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <div className="metadata-item">
                           <Shield size={12} />
                           <span>{alert.recommendation}</span>
                         </div>
@@ -259,9 +307,9 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName }) => {
                         <button className="alert-action-button">
                           Review
                         </button>
-                        <button className="alert-action-button" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: '#f4f4f4' }}>
-                          View Details <ChevronRight size={12} style={{ marginLeft: '2px' }} />
-                        </button>
+                        {/* <button className="alert-action-button secondary">
+                          View Details <ChevronRight size={12} />
+                        </button> */}
                       </div>
                     </li>
                   ))}

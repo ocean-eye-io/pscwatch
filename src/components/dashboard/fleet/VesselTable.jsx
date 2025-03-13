@@ -98,7 +98,6 @@ const VesselTable = ({
     }
   };
 
-  // Generate random alerts and statuses for each vessel
   const vesselsWithAlerts = vessels.map(vessel => {
     const statuses = ['Completed', 'In Progress', 'Pending'];
     const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
@@ -128,10 +127,12 @@ const VesselTable = ({
   const handleOpenAlertModal = (vessel) => {
     setSelectedVesselAlerts({
       vesselName: vessel.vessel_name,
+      pscScore: vessel.pscScore,
       ...vessel.alerts
     });
     setAlertModalOpen(true);
   };
+
   const formatDateTime = (dateString, includeTime = false) => {
     if (!dateString) return '-';
     
@@ -412,6 +413,7 @@ const VesselTable = ({
         onClose={() => setAlertModalOpen(false)}
         alerts={selectedVesselAlerts || { redAlerts: 0, yellowAlerts: 0 }}
         vesselName={selectedVesselAlerts?.vesselName || 'Vessel'}
+        pscScore={selectedVesselAlerts?.pscScore}
       />
     </>
   );
