@@ -2034,7 +2034,7 @@
   .force-compact-all .chart-card,
   .dashboard-container .chart-card {
     height: 120px !important;
-    min-height: 220px !important;
+    min-height: 240px !important;
     max-height: 120px !important;
     margin-bottom: 6px !important;
   }
@@ -2301,7 +2301,7 @@
 
 /* Direct overrides for chartStyles.css */
 :root {
-  --chart-height: 220px !important;
+  --chart-height: 260px !important;
 }
 
 .chart-card {
