@@ -13,18 +13,18 @@ export const fleetFieldMappings = {
       priority: 2,
       width: '80px'
     },
-    owner: {
-      dbField: 'owner',
-      label: 'Owner',
-      priority: 3,
-      width: '150px'
-    },
-    event_type: {
-      dbField: 'event_type',
-      label: 'Event Type',
-      priority: 4,
-      width: '140px'
-    },
+    // owner: {
+    //   dbField: 'owner',
+    //   label: 'Owner',
+    //   priority: 3,
+    //   width: '150px'
+    // },
+    // event_type: {
+    //   dbField: 'event_type',
+    //   label: 'Event Type',
+    //   priority: 4,
+    //   width: '140px'
+    // },
     departure_port: {
       dbField: 'departure_port',
       label: 'Departure Port',
@@ -44,12 +44,12 @@ export const fleetFieldMappings = {
       priority: 7,
       width: '150px'
     },
-    arrival_country: {
-      dbField: 'arrival_country',
-      label: 'Arrival Country',
-      priority: 8,
-      width: '150px'
-    },
+    // arrival_country: {
+    //   dbField: 'arrival_country',
+    //   label: 'Arrival Country',
+    //   priority: 8,
+    //   width: '150px'
+    // },
     eta: {
       dbField: 'eta',
       label: 'ETA',
@@ -58,18 +58,18 @@ export const fleetFieldMappings = {
       type: 'datetime'
 
     },
-    etb: {
-      dbField: 'etb',
-      label: 'ETB',
-      priority: 10,
-      width: '120px',
-      type: 'date'
-    },
+    // etb: {
+    //   dbField: 'etb',
+    //   label: 'ETB',
+    //   priority: 10,
+    //   width: '120px',
+    //   type: 'date'
+    // },
     checklist_received: {
       dbField: 'checklist_received',
-      label: '5day Checklist Received',
+      label: 'Checklist Received',
       priority: 10, // Adjust the priority as needed
-      width: '150px'
+      width: '120px'
     },
     comments: {
       dbField: 'comments',
@@ -93,12 +93,12 @@ export const fleetFieldMappings = {
       priority: 6,
       type: 'datetime'
     },
-    atd: {
-      dbField: 'atd',
-      label: 'ATD',
-      priority: 7,
-      type: 'datetime'
-    },
+    // atd: {
+    //   dbField: 'atd',
+    //   label: 'ATD',
+    //   priority: 7,
+    //   type: 'datetime'
+    // },
     
     psc_last_inspection_date: {
       dbField: 'psc_last_inspection_date',

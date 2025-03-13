@@ -5,6 +5,7 @@ import TableBadge from './TableBadge';
 import StatusIndicator from './StatusIndicator';
 import ExpandedItem from './ExpandedItem';
 import ActionButton from './ActionButton';
+import AlertIndicator from './AlertIndicator';
 import './tableStyles.css';
 
 export { 
@@ -13,6 +14,7 @@ export {
   TableBadge, 
   StatusIndicator, 
   ExpandedItem, 
-  ActionButton 
+  ActionButton,
+  AlertIndicator
 };
 export default Table;

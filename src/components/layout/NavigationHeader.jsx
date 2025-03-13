@@ -47,7 +47,7 @@ const NavigationHeader = ({ activePage, onNavigate }) => {
         <div className="brand-container">
           <Ship size={28} className="brand-icon" />
           <div className="brand-text">
-            <h1>FleetWatch</h1>
+            <h1>PscWatch</h1>
             <div className="animated-wave"></div>
           </div>
         </div>
@@ -82,7 +82,7 @@ const NavigationHeader = ({ activePage, onNavigate }) => {
       <aside className={`mobile-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <Ship size={24} />
-          <h2>FleetWatch</h2>
+          <h2>PscWatch</h2>
         </div>
         <nav className="sidebar-nav">
           {navItems.map(item => (

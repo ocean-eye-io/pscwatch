@@ -1,19 +1,52 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MessageSquare } from 'lucide-react';
 import {
   Table,
   StatusIndicator,
   TableBadge,
-  ExpandedItem
+  ExpandedItem,
+  AlertIndicator
 } from '../../common/Table';
 import CheckboxField from '../../common/Table/CheckboxField';
+import AlertModal from './AlertModal';
 
 const VesselTable = ({ 
   vessels, 
   onOpenRemarks, 
   fieldMappings,
-  onUpdateVessel // Add this prop to handle vessel updates
+  onUpdateVessel
 }) => {
+  // State for alert modal
+  const [alertModalOpen, setAlertModalOpen] = useState(false);
+  const [selectedVesselAlerts, setSelectedVesselAlerts] = useState(null);
+  
+  // Generate random alerts for each vessel (if not already present)
+  const vesselsWithAlerts = vessels.map(vessel => {
+    if (!vessel.alerts) {
+      // Generate random alert counts
+      const redAlerts = Math.floor(Math.random() * 3); // 0-2 red alerts
+      const yellowAlerts = Math.floor(Math.random() * 4) + 1; // 1-4 yellow alerts
+      
+      return {
+        ...vessel,
+        alerts: {
+          redAlerts,
+          yellowAlerts
+        }
+      };
+    }
+    return vessel;
+  });
+  
+  // Handler for opening alert modal
+  const handleOpenAlertModal = (vessel) => {
+    setSelectedVesselAlerts({
+      vesselName: vessel.vessel_name,
+      ...vessel.alerts
+    });
+    setAlertModalOpen(true);
+  };
+
   // Enhanced format function that can handle both date and date+time
   const formatDateTime = (dateString, includeTime = false) => {
     if (!dateString) return '-';
@@ -71,7 +104,7 @@ const VesselTable = ({
 
   // Convert field mappings to table columns format
   const getTableColumns = () => {
-    return Object.entries(fieldMappings.TABLE)
+    const columns = Object.entries(fieldMappings.TABLE)
       .filter(([fieldId, field]) => !field.isAction && fieldId !== 'comments') // Exclude comments from main columns
       .sort((a, b) => a[1].priority - b[1].priority)
       .map(([fieldId, field]) => ({
@@ -138,6 +171,23 @@ const VesselTable = ({
           return value === null || value === undefined ? '-' : value;
         }
       }));
+      
+    // Add Alerts column
+    columns.push({
+      field: 'alerts',
+      label: 'Alerts',
+      width: '100px',
+      sortable: false,
+      render: (value, rowData) => (
+        <AlertIndicator
+          redCount={value ? value.redAlerts : 0}
+          yellowCount={value ? value.yellowAlerts : 0}
+          onClick={() => handleOpenAlertModal(rowData)}
+        />
+      )
+    });
+    
+    return columns;
   };
 
   // Create expanded content renderer
@@ -227,15 +277,24 @@ const VesselTable = ({
   };
 
   return (
-    <Table
-      data={vessels}
-      columns={getTableColumns()}
-      expandedContent={renderExpandedContent}
-      actions={commentsColumn}
-      uniqueIdField="imo_no"
-      defaultSortKey="eta"
-      defaultSortDirection="desc"
-    />
+    <>
+      <Table
+        data={vesselsWithAlerts}
+        columns={getTableColumns()}
+        expandedContent={renderExpandedContent}
+        actions={commentsColumn}
+        uniqueIdField="imo_no"
+        defaultSortKey="eta"
+        defaultSortDirection="desc"
+      />
+      
+      <AlertModal
+        isOpen={alertModalOpen}
+        onClose={() => setAlertModalOpen(false)}
+        alerts={selectedVesselAlerts || { redAlerts: 0, yellowAlerts: 0 }}
+        vesselName={selectedVesselAlerts?.vesselName || 'Vessel'}
+      />
+    </>
   );
 };
 
