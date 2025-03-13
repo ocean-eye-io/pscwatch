@@ -54,7 +54,7 @@ export const fleetFieldMappings = {
       dbField: 'eta',
       label: 'ETA',
       priority: 9,
-      width: '170px',
+      width: '150px',
       type: 'datetime'
 
     },
