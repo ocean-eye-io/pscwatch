@@ -1,4 +1,4 @@
-// src/components/manager/Charts/ResponsiveChartContainer.jsx
+// src/components/common/Charts/ResponsiveChartContainer.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Maximize2, Minimize2, Download, RefreshCw } from 'lucide-react';
 import './styles/chartStyles.css';
@@ -25,19 +25,19 @@ const ResponsiveChartContainer = ({
         <defs>
           {/* Bar chart gradient */}
           <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#4CC9F0" stopOpacity={0.8}/>
+            <stop offset="0%" stopColor="#4DC3FF" stopOpacity={0.8}/>
             <stop offset="100%" stopColor="#3BADE5" stopOpacity={0.6}/>
           </linearGradient>
           
           {/* Bar chart hover gradient */}
           <linearGradient id="barGradientHover" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#4CC9F0" stopOpacity={1}/>
+            <stop offset="0%" stopColor="#4DC3FF" stopOpacity={1}/>
             <stop offset="100%" stopColor="#3BADE5" stopOpacity={0.8}/>
           </linearGradient>
           
           {/* Area chart gradient */}
           <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#4CC9F0" stopOpacity={0.8}/>
+            <stop offset="0%" stopColor="#4DC3FF" stopOpacity={0.8}/>
             <stop offset="90%" stopColor="#3BADE5" stopOpacity={0.1}/>
             <stop offset="100%" stopColor="#3BADE5" stopOpacity={0}/>
           </linearGradient>
@@ -59,19 +59,22 @@ const ResponsiveChartContainer = ({
   );
 
   // Toggle expanded state
-  const toggleExpand = () => {
+  const toggleExpand = (e) => {
+    if (e) e.stopPropagation();
     setIsExpanded(!isExpanded);
   };
 
   // Handle download
-  const handleDownload = () => {
+  const handleDownload = (e) => {
+    if (e) e.stopPropagation();
     if (downloadChart && typeof downloadChart === 'function') {
       downloadChart();
     }
   };
 
   // Handle refresh
-  const handleRefresh = () => {
+  const handleRefresh = (e) => {
+    if (e) e.stopPropagation();
     if (onRefresh && typeof onRefresh === 'function') {
       onRefresh();
     }
@@ -93,15 +96,18 @@ const ResponsiveChartContainer = ({
     window.addEventListener('resize', updateDimensions);
 
     // Observer for size changes
-    const resizeObserver = new ResizeObserver(updateDimensions);
-    if (chartWrapperRef.current) {
-      resizeObserver.observe(chartWrapperRef.current);
+    let resizeObserver;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(updateDimensions);
+      if (chartWrapperRef.current) {
+        resizeObserver.observe(chartWrapperRef.current);
+      }
     }
 
     // Cleanup
     return () => {
       window.removeEventListener('resize', updateDimensions);
-      if (chartWrapperRef.current) {
+      if (resizeObserver && chartWrapperRef.current) {
         resizeObserver.unobserve(chartWrapperRef.current);
       }
     };
@@ -135,7 +141,7 @@ const ResponsiveChartContainer = ({
   }, [isExpanded]);
 
   // Calculate custom style if height prop is provided
-  const customStyle = height ? { height } : {};
+  const customStyle = height ? { height } : { height: 'var(--chart-height)' };
 
   return (
     <div 
@@ -182,7 +188,11 @@ const ResponsiveChartContainer = ({
         </div>
       </div>
       
-      <div className="chart-wrapper" ref={chartWrapperRef}>
+      <div 
+        className="chart-wrapper" 
+        ref={chartWrapperRef}
+        style={{ width: '100%', height: 'calc(100% - 38px)' }}
+      >
         {/* Render children if they exist */}
         {children && React.Children.map(children, child => {
           // Skip null or undefined children
@@ -190,8 +200,9 @@ const ResponsiveChartContainer = ({
           
           // Clone the child element with new props
           return React.cloneElement(child, {
-            width: chartWidth > 0 ? chartWidth : undefined,
-            height: chartHeight > 0 ? chartHeight : undefined,
+            width: "100%",
+            height: "100%",
+            aspect: null,
             className: "chart-transition"
           });
         })}

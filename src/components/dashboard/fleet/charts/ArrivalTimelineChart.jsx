@@ -1,27 +1,34 @@
-
-
+/*src/components/dashboard/fleet/charts/ArrivalTimelineChart.jsx*/
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, LabelList, ResponsiveContainer } from 'recharts';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Cell, 
+  LabelList, 
+  ResponsiveContainer 
+} from 'recharts';
 import { Download, Maximize2, Minimize2 } from 'lucide-react';
-//import ResponsiveChartContainer from '../../../common/charts/ResponsiveChartContainer';
 import '../../../common/charts/styles/chartStyles.css';
 
 const ArrivalTimelineChart = ({ data }) => {
   const [isActive, setIsActive] = useState(false);
   const [hoveredBar, setHoveredBar] = useState(null);
   
-  // Default empty data array to prevent mapping errors
+  // Ensure data safety
   const safeData = Array.isArray(data) ? data : [];
+  const hasData = safeData.length > 0;
 
   // Custom tooltip component
   const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length > 0) {
+    if (active && payload?.[0]) {
       return (
         <div className="custom-tooltip">
           <p className="tooltip-label">{payload[0].payload.range}</p>
-          <p className="tooltip-value">
-            {payload[0].value} vessels
-          </p>
+          <p className="tooltip-value">{payload[0].value} vessels</p>
           <div className="tooltip-arrow"></div>
         </div>
       );
@@ -29,14 +36,46 @@ const ArrivalTimelineChart = ({ data }) => {
     return null;
   };
 
-  // Determine if we have data to show
-  const hasData = safeData.length > 0;
+  // Event handlers
+  const handleExpandToggle = (e) => {
+    e.stopPropagation();
+    setIsActive(!isActive);
+  };
+
+  const handleDownload = (e) => {
+    e.stopPropagation();
+    // Implement download functionality
+    console.log('Download initiated');
+  };
+
+  const handleMouseMove = (e) => {
+    if (e?.activeTooltipIndex !== undefined) {
+      setHoveredBar(e.activeTooltipIndex);
+    }
+  };
+
+  // Chart gradients definition
+  const renderGradients = () => (
+    <defs>
+      <linearGradient id="defaultBarGradient" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stopColor="#4DC3FF" stopOpacity={0.8} />
+        <stop offset="100%" stopColor="#4DC3FF" stopOpacity={1} />
+      </linearGradient>
+      {safeData.map((_, index) => (
+        <linearGradient
+          key={`gradient-${index}`}
+          id={`barGradient-${index}`}
+          x1="0" y1="0" x2="1" y2="0"
+        >
+          <stop offset="0%" stopColor={data[index]?.color || '#4DC3FF'} stopOpacity={0.8} />
+          <stop offset="100%" stopColor={data[index]?.color || '#4DC3FF'} stopOpacity={1} />
+        </linearGradient>
+      ))}
+    </defs>
+  );
 
   return (
-    <div 
-      className={`chart-card ${isActive ? 'active' : ''}`}
-      onClick={() => setIsActive(!isActive)}
-    >
+    <div className={`chart-card ${isActive ? 'active' : ''}`}>
       <div className="chart-header">
         <h3 className="chart-title">
           Arrival in (Days)
@@ -45,19 +84,15 @@ const ArrivalTimelineChart = ({ data }) => {
         <div className="chart-actions">
           <button 
             className="chart-action-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              // Add export functionality
-            }}
+            onClick={handleDownload}
+            title="Download chart"
           >
             <Download size={14} />
           </button>
           <button 
             className="chart-action-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsActive(!isActive);
-            }}
+            onClick={handleExpandToggle}
+            title={isActive ? "Minimize" : "Maximize"}
           >
             {isActive ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
@@ -66,50 +101,16 @@ const ArrivalTimelineChart = ({ data }) => {
 
       <div className="chart-wrapper timeline-chart">
         {hasData ? (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" aspect={null}>
             <BarChart 
               data={safeData}
               layout="vertical"
-              margin={{ top: 20, right: 50, left: 20, bottom: 5 }}
-              onMouseMove={(e) => {
-                if (e && e.activeTooltipIndex !== undefined) {
-                  setHoveredBar(e.activeTooltipIndex);
-                }
-              }}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              onMouseMove={handleMouseMove}
               onMouseLeave={() => setHoveredBar(null)}
               className="chart-transition"
             >
-              <defs>
-                {/* Create a default gradient for all bars */}
-                <linearGradient id="defaultBarGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#3BADE5" stopOpacity={0.8} />
-                  <stop offset="100%" stopColor="#3BADE5" stopOpacity={1} />
-                </linearGradient>
-                
-                {/* Only create individual gradients if we have data */}
-                {safeData.map((entry, index) => (
-                  <linearGradient
-                    key={`gradient-${index}`}
-                    id={`barGradient-${index}`}
-                    x1="0"
-                    y1="0"
-                    x2="1"
-                    y2="0"
-                  >
-                    <stop
-                      offset="0%"
-                      stopColor={entry.color || '#3BADE5'}
-                      stopOpacity={0.8}
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor={entry.color || '#3BADE5'}
-                      stopOpacity={1}
-                    />
-                  </linearGradient>
-                ))}
-              </defs>
-
+              {renderGradients()}
               <CartesianGrid 
                 strokeDasharray="3 3" 
                 stroke="rgba(244, 244, 244, 0.05)" 
@@ -119,15 +120,15 @@ const ArrivalTimelineChart = ({ data }) => {
                 type="number" 
                 stroke="#f4f4f4"
                 tickLine={false}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 11 }}
               />
               <YAxis 
                 dataKey="range" 
                 type="category" 
                 stroke="#f4f4f4" 
-                width={100}
+                width={80}
                 tickLine={false}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 11 }}
               />
               <Tooltip 
                 cursor={false}
@@ -135,11 +136,11 @@ const ArrivalTimelineChart = ({ data }) => {
               />
               <Bar 
                 dataKey="vessels" 
-                barSize={40}
+                barSize={32}
                 className="timeline-bar"
-                fill="url(#defaultBarGradient)" // Fallback fill
+                fill="url(#defaultBarGradient)"
               >
-                {safeData.map((entry, index) => (
+                {safeData.map((_, index) => (
                   <Cell 
                     key={`cell-${index}`} 
                     fill={`url(#barGradient-${index})`}
@@ -152,7 +153,7 @@ const ArrivalTimelineChart = ({ data }) => {
                   fill="#f4f4f4"
                   className="timeline-label"
                   formatter={(value) => `${value}`}
-                  fontSize={12}
+                  fontSize={11}
                 />
               </Bar>
             </BarChart>

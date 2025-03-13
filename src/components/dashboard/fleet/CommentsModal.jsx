@@ -36,10 +36,12 @@ const CommentsModal = ({
   const handleSaveComment = async () => {
     setIsSaving(true);
     setError('');
+    console.log("Vessel object:", vessel);
+    console.log("Vessel ID type:", typeof vessel.id);
+    console.log("Comment to save:", comment);
 
     try {
-      // For development/testing environment - simulate API call
-      // In production, you would use the real API endpoint
+      
       if (process.env.NODE_ENV === 'development' || window.location.hostname === 'stackblitz.com') {
         console.log('Development mode: Simulating API call');
         
@@ -66,6 +68,7 @@ const CommentsModal = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          id: vessel.id, 
           imo_no: vessel.imo_no,
           comments: comment
         }),

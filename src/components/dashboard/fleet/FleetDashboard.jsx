@@ -44,15 +44,73 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
   const handleCommentUpdated = (updatedVessel) => {
     // Update the vessels array with the updated vessel
     setVessels(vessels.map(vessel => 
-      vessel.imo_no === updatedVessel.imo_no ? updatedVessel : vessel
+      vessel.id === updatedVessel.id ? updatedVessel : vessel
     ));
     
     // Also update the filtered vessels array
     setFilteredVessels(filteredVessels.map(vessel => 
-      vessel.imo_no === updatedVessel.imo_no ? updatedVessel : vessel
+      vessel.id === updatedVessel.id ? updatedVessel : vessel
     ));
   };
+  
 
+  const handleVesselUpdate = async (updatedVessel) => {
+    try {
+      console.log('Updating vessel:', updatedVessel.imo_no, 'with checklist value:', updatedVessel.checklist_received);
+      
+      // Simple payload with only what's needed
+      const payload = {
+        id: updatedVessel.id,
+        imo_no: updatedVessel.imo_no,
+        checklist_received: updatedVessel.checklist_received
+      };
+      
+      // Send the update to your API
+      const response = await fetch(`${API_URL.replace(/\/$/, '')}/checklist`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+      }
+      
+      const responseData = await response.json();
+      console.log('Checklist update response:', responseData);
+      
+     
+      const updatedChecklistValue = responseData.checklist_received === true;
+      
+      setVessels(prevVessels => 
+        prevVessels.map(vessel => 
+          vessel.imo_no === updatedVessel.imo_no ? {
+            ...vessel,
+            checklist_received: updatedChecklistValue
+          } : vessel
+        )
+      );
+      
+      // Also update the filtered vessels array
+      setFilteredVessels(prevFiltered => 
+        prevFiltered.map(vessel => 
+          vessel.imo_no === updatedVessel.imo_no ? {
+            ...vessel,
+            checklist_received: updatedChecklistValue
+          } : vessel
+        )
+      );
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating vessel checklist:', error);
+      return false;
+    }
+  };
+  
   // API endpoint
   const API_URL = 'https://qescpqp626isx43ab5mnlyvayi0zvvsg.lambda-url.ap-south-1.on.aws/api/vessels';
 
@@ -691,7 +749,7 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
                 <span>Loading chart data...</span>
               </div>
             ) : (
-              <ArrivalsByPortChart data={vesselsByPortData} />
+              <ArrivalsByPortChart data={vesselsByPortData}/>
             )}
           </div>
         </div>
@@ -704,7 +762,7 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
                 <span>Loading chart data...</span>
               </div>
             ) : (
-              <ArrivalTimelineChart data={arrivalTimelineData} />
+              <ArrivalTimelineChart data={arrivalTimelineData}/>
             )}
           </div>
         </div>
@@ -728,6 +786,7 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
             vessels={filteredVessels}
             onOpenRemarks={handleOpenComments}
             fieldMappings={fieldMappings}
+            onUpdateVessel={handleVesselUpdate}
           />
         )}
       </div>
