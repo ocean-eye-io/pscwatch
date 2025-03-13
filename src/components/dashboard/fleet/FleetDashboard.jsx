@@ -11,6 +11,12 @@ import './FleetStyles.css';
 import CommentsModal from './CommentsModal';
 
 const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
+  const filterConfig = {
+    showVoyageStatusFilter: true,
+    showPortFilter: true,
+    showStatusFilter: false, // Set to false to hide Status filter
+    showDocFilter: false     // Set to false to hide DOC filter
+  };
   // State variables
   const [vessels, setVessels] = useState([]);
   const [filteredVessels, setFilteredVessels] = useState([]);
@@ -53,7 +59,7 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
     ));
   };
   
-
+  
   const handleVesselUpdate = async (updatedVessel) => {
     try {
       console.log('Updating vessel:', updatedVessel.imo_no, 'with checklist value:', updatedVessel.checklist_received);
@@ -500,218 +506,224 @@ const FleetDashboard = ({ onOpenInstructions, fieldMappings }) => {
         
         <div className="filter-chips">
           {/* Voyage Status Filter Dropdown */}
-          <div className="filter-dropdown-container" onClick={(e) => e.stopPropagation()}>
-            <button 
-              className={`filter-dropdown-button ${showVoyageStatusDropdown ? 'active' : ''}`}
-              onClick={() => {
-                setShowVoyageStatusDropdown(!showVoyageStatusDropdown);
-                setShowPortDropdown(false);
-                setShowStatusDropdown(false);
-                setShowDocDropdown(false);
-              }}
-            >
-              {voyageStatusFilter}
-              <span className="filter-count">1/3</span>
-            </button>
-            
-            {showVoyageStatusDropdown && (
-              <div className="filter-dropdown-content">
-                <div className="filter-dropdown-header">
-                  <h4>Voyage Status</h4>
-                </div>
-                <div className="filter-dropdown-items">
-                  <div className="filter-checkbox-item">
-                    <label>
-                      <input
-                        type="radio"
-                        checked={voyageStatusFilter === 'All Voyages'}
-                        onChange={() => setVoyageStatusFilter('All Voyages')}
-                        name="voyageStatus"
-                      />
-                      <span>All Voyages</span>
-                    </label>
+          {filterConfig.showVoyageStatusFilter && (
+            <div className="filter-dropdown-container" onClick={(e) => e.stopPropagation()}>
+              <button 
+                className={`filter-dropdown-button ${showVoyageStatusDropdown ? 'active' : ''}`}
+                onClick={() => {
+                  setShowVoyageStatusDropdown(!showVoyageStatusDropdown);
+                  setShowPortDropdown(false);
+                  setShowStatusDropdown(false);
+                  setShowDocDropdown(false);
+                }}
+              >
+                {voyageStatusFilter}
+                <span className="filter-count">1/3</span>
+              </button>
+              
+              {showVoyageStatusDropdown && (
+                <div className="filter-dropdown-content">
+                  <div className="filter-dropdown-header">
+                    <h4>Voyage Status</h4>
                   </div>
-                  <div className="filter-checkbox-item">
-                    <label>
-                      <input
-                        type="radio"
-                        checked={voyageStatusFilter === 'Current Voyages'}
-                        onChange={() => setVoyageStatusFilter('Current Voyages')}
-                        name="voyageStatus"
-                      />
-                      <span>Current Voyages</span>
-                    </label>
+                  <div className="filter-dropdown-items">
+                    <div className="filter-checkbox-item">
+                      <label>
+                        <input
+                          type="radio"
+                          checked={voyageStatusFilter === 'All Voyages'}
+                          onChange={() => setVoyageStatusFilter('All Voyages')}
+                          name="voyageStatus"
+                        />
+                        <span>All Voyages</span>
+                      </label>
+                    </div>
+                    <div className="filter-checkbox-item">
+                      <label>
+                        <input
+                          type="radio"
+                          checked={voyageStatusFilter === 'Current Voyages'}
+                          onChange={() => setVoyageStatusFilter('Current Voyages')}
+                          name="voyageStatus"
+                        />
+                        <span>Current Voyages</span>
+                      </label>
+                    </div>
+                    <div className="filter-checkbox-item">
+                      <label>
+                        <input
+                          type="radio"
+                          checked={voyageStatusFilter === 'Past Voyages'}
+                          onChange={() => setVoyageStatusFilter('Past Voyages')}
+                          name="voyageStatus"
+                        />
+                        <span>Past Voyages</span>
+                      </label>
+                    </div>
                   </div>
-                  <div className="filter-checkbox-item">
-                    <label>
-                      <input
-                        type="radio"
-                        checked={voyageStatusFilter === 'Past Voyages'}
-                        onChange={() => setVoyageStatusFilter('Past Voyages')}
-                        name="voyageStatus"
-                      />
-                      <span>Past Voyages</span>
-                    </label>
+                  <div className="filter-dropdown-footer">
+                    <button 
+                      className="apply-btn"
+                      onClick={() => setShowVoyageStatusDropdown(false)}
+                    >
+                      Apply
+                    </button>
                   </div>
                 </div>
-                <div className="filter-dropdown-footer">
-                  <button 
-                    className="apply-btn"
-                    onClick={() => setShowVoyageStatusDropdown(false)}
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-          
+              )}
+            </div>
+          )}
           {/* Port Filter Dropdown */}
-          <div className="filter-dropdown-container" onClick={(e) => e.stopPropagation()}>
-            <button 
-              className={`filter-dropdown-button ${showPortDropdown ? 'active' : ''}`}
-              onClick={() => {
-                setShowPortDropdown(!showPortDropdown);
-                setShowVoyageStatusDropdown(false);
-                setShowStatusDropdown(false);
-                setShowDocDropdown(false);
-              }}
-            >
-              Ports
-              <span className="filter-count">{portFilters.length}/{uniquePorts.length}</span>
-            </button>
-            
-            {showPortDropdown && (
-              <div className="filter-dropdown-content">
-                <div className="filter-dropdown-header">
-                  <h4>Filter by Port</h4>
-                  <button className="select-all-btn" onClick={() => toggleAllItems('ports')}>
-                    {portFilters.length === uniquePorts.length ? 'Deselect All' : 'Select All'}
-                  </button>
+          {filterConfig.showPortFilter && (
+            <div className="filter-dropdown-container" onClick={(e) => e.stopPropagation()}>
+              <button 
+                className={`filter-dropdown-button ${showPortDropdown ? 'active' : ''}`}
+                onClick={() => {
+                  setShowPortDropdown(!showPortDropdown);
+                  setShowVoyageStatusDropdown(false);
+                  setShowStatusDropdown(false);
+                  setShowDocDropdown(false);
+                }}
+              >
+                Ports
+                <span className="filter-count">{portFilters.length}/{uniquePorts.length}</span>
+              </button>
+              
+              {showPortDropdown && (
+                <div className="filter-dropdown-content">
+                  <div className="filter-dropdown-header">
+                    <h4>Filter by Port</h4>
+                    <button className="select-all-btn" onClick={() => toggleAllItems('ports')}>
+                      {portFilters.length === uniquePorts.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+                  <div className="filter-dropdown-items">
+                    {uniquePorts.map(port => (
+                      <div key={port} className="filter-checkbox-item">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={portFilters.includes(port)}
+                            onChange={() => toggleFilterItem('ports', port)}
+                          />
+                          <span>{port}</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="filter-dropdown-footer">
+                    <button 
+                      className="apply-btn"
+                      onClick={() => setShowPortDropdown(false)}
+                    >
+                      Apply
+                    </button>
+                  </div>
                 </div>
-                <div className="filter-dropdown-items">
-                  {uniquePorts.map(port => (
-                    <div key={port} className="filter-checkbox-item">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={portFilters.includes(port)}
-                          onChange={() => toggleFilterItem('ports', port)}
-                        />
-                        <span>{port}</span>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div className="filter-dropdown-footer">
-                  <button 
-                    className="apply-btn"
-                    onClick={() => setShowPortDropdown(false)}
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-          
+              )}
+            </div>
+          )}
           {/* Status Filter Dropdown */}
-          <div className="filter-dropdown-container" onClick={(e) => e.stopPropagation()}>
-            <button 
-              className={`filter-dropdown-button ${showStatusDropdown ? 'active' : ''}`}
-              onClick={() => {
-                setShowStatusDropdown(!showStatusDropdown);
-                setShowVoyageStatusDropdown(false);
-                setShowPortDropdown(false);
-                setShowDocDropdown(false);
-              }}
-            >
-              Status
-              <span className="filter-count">{statusFilters.length}/{uniqueStatuses.length}</span>
-            </button>
-            
-            {showStatusDropdown && (
-              <div className="filter-dropdown-content">
-                <div className="filter-dropdown-header">
-                  <h4>Filter by Status</h4>
-                  <button className="select-all-btn" onClick={() => toggleAllItems('statuses')}>
-                    {statusFilters.length === uniqueStatuses.length ? 'Deselect All' : 'Select All'}
-                  </button>
+          {filterConfig.showStatusFilter && (
+            <div className="filter-dropdown-container" onClick={(e) => e.stopPropagation()}>
+              <button 
+                className={`filter-dropdown-button ${showStatusDropdown ? 'active' : ''}`}
+                onClick={() => {
+                  setShowStatusDropdown(!showStatusDropdown);
+                  setShowVoyageStatusDropdown(false);
+                  setShowPortDropdown(false);
+                  setShowDocDropdown(false);
+                }}
+              >
+                Status
+                <span className="filter-count">{statusFilters.length}/{uniqueStatuses.length}</span>
+              </button>
+              
+              {showStatusDropdown && (
+                <div className="filter-dropdown-content">
+                  <div className="filter-dropdown-header">
+                    <h4>Filter by Status</h4>
+                    <button className="select-all-btn" onClick={() => toggleAllItems('statuses')}>
+                      {statusFilters.length === uniqueStatuses.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+                  <div className="filter-dropdown-items">
+                    {uniqueStatuses.map(status => (
+                      <div key={status} className="filter-checkbox-item">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={statusFilters.includes(status)}
+                            onChange={() => toggleFilterItem('statuses', status)}
+                          />
+                          <span>{status}</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="filter-dropdown-footer">
+                    <button 
+                      className="apply-btn"
+                      onClick={() => setShowStatusDropdown(false)}
+                    >
+                      Apply
+                    </button>
+                  </div>
                 </div>
-                <div className="filter-dropdown-items">
-                  {uniqueStatuses.map(status => (
-                    <div key={status} className="filter-checkbox-item">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={statusFilters.includes(status)}
-                          onChange={() => toggleFilterItem('statuses', status)}
-                        />
-                        <span>{status}</span>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div className="filter-dropdown-footer">
-                  <button 
-                    className="apply-btn"
-                    onClick={() => setShowStatusDropdown(false)}
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}  
           
           {/* DOC Filter Dropdown */}
-          <div className="filter-dropdown-container" onClick={(e) => e.stopPropagation()}>
-            <button 
-              className={`filter-dropdown-button ${showDocDropdown ? 'active' : ''}`}
-              onClick={() => {
-                setShowDocDropdown(!showDocDropdown);
-                setShowVoyageStatusDropdown(false);
-                setShowPortDropdown(false);
-                setShowStatusDropdown(false);
-              }}
-            >
-              DOC
-              <span className="filter-count">{docFilters.length}/{uniqueDocs.length}</span>
-            </button>
-            
-            {showDocDropdown && (
-              <div className="filter-dropdown-content">
-                <div className="filter-dropdown-header">
-                  <h4>Filter by DOC</h4>
-                  <button className="select-all-btn" onClick={() => toggleAllItems('docs')}>
-                    {docFilters.length === uniqueDocs.length ? 'Deselect All' : 'Select All'}
-                  </button>
+          {filterConfig.showDocFilter && (
+            <div className="filter-dropdown-container" onClick={(e) => e.stopPropagation()}>
+              <button 
+                className={`filter-dropdown-button ${showDocDropdown ? 'active' : ''}`}
+                onClick={() => {
+                  setShowDocDropdown(!showDocDropdown);
+                  setShowVoyageStatusDropdown(false);
+                  setShowPortDropdown(false);
+                  setShowStatusDropdown(false);
+                }}
+              >
+                DOC
+                <span className="filter-count">{docFilters.length}/{uniqueDocs.length}</span>
+              </button>
+              
+              {showDocDropdown && (
+                <div className="filter-dropdown-content">
+                  <div className="filter-dropdown-header">
+                    <h4>Filter by DOC</h4>
+                    <button className="select-all-btn" onClick={() => toggleAllItems('docs')}>
+                      {docFilters.length === uniqueDocs.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+                  <div className="filter-dropdown-items">
+                    {uniqueDocs.map(doc => (
+                      <div key={doc} className="filter-checkbox-item">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={docFilters.includes(doc)}
+                            onChange={() => toggleFilterItem('docs', doc)}
+                          />
+                          <span>{doc}</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="filter-dropdown-footer">
+                    <button 
+                      className="apply-btn"
+                      onClick={() => setShowDocDropdown(false)}
+                    >
+                      Apply
+                    </button>
+                  </div>
                 </div>
-                <div className="filter-dropdown-items">
-                  {uniqueDocs.map(doc => (
-                    <div key={doc} className="filter-checkbox-item">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={docFilters.includes(doc)}
-                          onChange={() => toggleFilterItem('docs', doc)}
-                        />
-                        <span>{doc}</span>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div className="filter-dropdown-footer">
-                  <button 
-                    className="apply-btn"
-                    onClick={() => setShowDocDropdown(false)}
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}  
           
           {/* Reset Button */}
           <button className="reset-button" onClick={resetFilters}>
