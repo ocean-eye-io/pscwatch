@@ -62,14 +62,14 @@ export const fleetFieldMappings = {
       dbField: 'etb',
       label: 'ETB',
       priority: 10,
-      width: '150px',
+      width: '120px',
       type: 'date'
     },
     checklist_received: {
       dbField: 'checklist_received',
       label: '5day Checklist Received',
       priority: 10, // Adjust the priority as needed
-      width: '180px'
+      width: '150px'
     },
     comments: {
       dbField: 'comments',
