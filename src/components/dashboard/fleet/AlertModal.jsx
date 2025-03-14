@@ -238,14 +238,25 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName, pscScore }) => {
                       
                       <p className="alert-item-description">{alert.description}</p>
                       
-                      <div className="alert-item-metadata">
+                      <div className="alert-item-metadata" style={{ marginTop: '16px' }}>
                         {/* <div className="metadata-item">
                           <Clock size={12} />
                           <span>{alert.timeDetected}</span>
                         </div> */}
                         <div className="metadata-item">
-                          <Shield size={12} />
-                          <span>{alert.recommendation}</span>
+                          <h5 style={{ 
+                            fontSize: '13px', 
+                            margin: '0 0 6px 0', 
+                            color: '#E74C3C', 
+                            fontWeight: '600', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '6px' 
+                          }}>
+                            <Shield size={14} />
+                            Recommendation
+                          </h5>
+                          <p style={{ margin: '0 0 0 20px' }}>{alert.recommendation}</p>
                         </div>
                       </div>
                       
@@ -292,14 +303,25 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName, pscScore }) => {
                       
                       <p className="alert-item-description">{alert.description}</p>
                       
-                      <div className="alert-item-metadata">
+                      <div className="alert-item-metadata" style={{ marginTop: '16px' }}>
                         {/* <div className="metadata-item">
                           <Clock size={12} />
                           <span>{alert.timeDetected}</span>
                         </div> */}
                         <div className="metadata-item">
-                          <Shield size={12} />
-                          <span>{alert.recommendation}</span>
+                          <h5 style={{ 
+                            fontSize: '13px', 
+                            margin: '0 0 6px 0', 
+                            color: '#F1C40F', 
+                            fontWeight: '600', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '6px' 
+                          }}>
+                            <Shield size={14} />
+                            Recommendation
+                          </h5>
+                          <p style={{ margin: '0 0 0 20px' }}>{alert.recommendation}</p>
                         </div>
                       </div>
                       
