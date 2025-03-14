@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageSquare } from 'lucide-react';
 import {
   Table,
@@ -18,6 +18,39 @@ const VesselTable = ({
 }) => {
   const [alertModalOpen, setAlertModalOpen] = useState(false);
   const [selectedVesselAlerts, setSelectedVesselAlerts] = useState(null);
+  // Add a new state to store processed vessels with stable random values
+  const [processedVessels, setProcessedVessels] = useState([]);
+
+  // Process vessels only when the vessels prop changes
+  useEffect(() => {
+    const processedData = vessels.map(vessel => {
+      const statuses = ['Completed', 'In Progress', 'Pending'];
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      const randomPSCScore = Math.floor(Math.random() * 100);
+
+      if (!vessel.alerts) {
+        const redAlerts = Math.floor(Math.random() * 3);
+        const yellowAlerts = Math.floor(Math.random() * 4) + 1;
+        
+        return {
+          ...vessel,
+          checklistStatus: randomStatus,
+          pscScore: randomPSCScore,
+          alerts: {
+            redAlerts,
+            yellowAlerts
+          }
+        };
+      }
+      return {
+        ...vessel,
+        checklistStatus: randomStatus,
+        pscScore: randomPSCScore
+      };
+    });
+    
+    setProcessedVessels(processedData);
+  }, [vessels]); // Only re-run if vessels prop changes
 
   const getGlassyStatusStyle = (status) => {
     const colors = {
@@ -97,32 +130,6 @@ const VesselTable = ({
       };
     }
   };
-
-  const vesselsWithAlerts = vessels.map(vessel => {
-    const statuses = ['Completed', 'In Progress', 'Pending'];
-    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-    const randomPSCScore = Math.floor(Math.random() * 100);
-
-    if (!vessel.alerts) {
-      const redAlerts = Math.floor(Math.random() * 3);
-      const yellowAlerts = Math.floor(Math.random() * 4) + 1;
-      
-      return {
-        ...vessel,
-        checklistStatus: randomStatus,
-        pscScore: randomPSCScore,
-        alerts: {
-          redAlerts,
-          yellowAlerts
-        }
-      };
-    }
-    return {
-      ...vessel,
-      checklistStatus: randomStatus,
-      pscScore: randomPSCScore
-    };
-  });
 
   const handleOpenAlertModal = (vessel) => {
     setSelectedVesselAlerts({
@@ -399,7 +406,7 @@ const VesselTable = ({
   return (
     <>
       <Table
-        data={vesselsWithAlerts}
+        data={processedVessels} // Use the processed vessels instead of regenerating
         columns={getTableColumns()}
         expandedContent={renderExpandedContent}
         actions={commentsColumn}
