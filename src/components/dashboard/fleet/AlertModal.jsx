@@ -7,49 +7,49 @@ const ALERT_RECOMMENDATIONS = {
     {
       title: "ECDIS System Malfunction",
       description: "Critical navigation system malfunction detected in ECDIS primary unit. Internal diagnostics show database corruption.",
-      timeDetected: "2 hours ago",
+      //timeDetected: "2 hours ago",
       recommendation: "Schedule immediate service at next port. Use backup navigation systems until resolved.",
       severity: "HIGH"
     },
     {
       title: "Hull Integrity Issue",
       description: "Sensors detected potential structural integrity anomaly in forward starboard section near frame #42.",
-      timeDetected: "4 hours ago",
+      //timeDetected: "4 hours ago",
       recommendation: "Immediate inspection required by qualified personnel. Reduce speed in rough seas.",
       severity: "HIGH"
     },
     {
       title: "Engine Performance Critical",
       description: "Main engine performance 28% below critical threshold. Abnormal vibration detected in cylinder #3.",
-      timeDetected: "1 day ago",
+      //timeDetected: "1 day ago",
       recommendation: "Reduce operational speed by 30%. Arrange immediate maintenance at next port.",
       severity: "HIGH"
     },
     {
       title: "Weather Alert - Severe Storm",
       description: "Severe weather system detected in vessel path. Wind speeds exceeding 55 knots and wave heights of 6-8 meters forecasted.",
-      timeDetected: "5 hours ago",
+      //timeDetected: "5 hours ago",
       recommendation: "Consider route adjustment of minimum 120NM to the south to ensure crew and cargo safety.",
       severity: "HIGH"
     },
     {
       title: "Security Breach Detected",
       description: "Multiple unauthorized access attempts detected on vessel's communication systems from external IP addresses.",
-      timeDetected: "30 minutes ago",
+      //timeDetected: "30 minutes ago",
       recommendation: "Security protocols should be reviewed immediately. Update firewall rules and credentials.",
       severity: "HIGH"
     },
     {
       title: "Ballast Water System Failure",
       description: "Ballast system pressure dropping in tanks 3B and 4B. Potential valve failure or leak affecting vessel stability.",
-      timeDetected: "3 hours ago",
+      //timeDetected: "3 hours ago",
       recommendation: "Immediate assessment of affected tanks required. Prepare contingency stability plan.",
       severity: "HIGH"
     },
     {
       title: "Fuel Quality Critical",
       description: "Fuel sample analysis shows contamination exceeding ISO 8217 limits. High catalyst fines (Al+Si) at 87 mg/kg.",
-      timeDetected: "12 hours ago",
+      //timeDetected: "12 hours ago",
       recommendation: "Switch to alternative bunker supply immediately. Increase purifier throughput and decrease settling time.",
       severity: "HIGH"
     }
@@ -58,56 +58,56 @@ const ALERT_RECOMMENDATIONS = {
     {
       title: "Maintenance Schedule Overdue",
       description: "16 routine maintenance tasks are between 14-21 days overdue, including critical safety equipment checks.",
-      timeDetected: "5 days ago",
+      //timeDetected: "5 days ago",
       recommendation: "Schedule maintenance at earliest convenience. Prioritize safety-critical systems.",
       severity: "MEDIUM"
     },
     {
       title: "Certificate Expiration Warning",
       description: "Multiple vessel certificates expire within 30 days: IOPP (21 days), Safety Equipment (28 days), Class (30 days).",
-      timeDetected: "2 days ago",
+      //timeDetected: "2 days ago",
       recommendation: "Initiate renewal process immediately. Contact flag administration for extensions if necessary.",
       severity: "MEDIUM"
     },
     {
       title: "Crew Change Required",
       description: "4 crew members approaching maximum contract duration (Chief Engineer, 2x ABs, Cook). Onboard time exceeding 9 months.",
-      timeDetected: "1 week ago",
+      //timeDetected: "1 week ago",
       recommendation: "Schedule relief personnel at next suitable port. Prepare documentation for immigration.",
       severity: "MEDIUM"
     },
     {
       title: "Fuel Consumption Anomaly",
       description: "Fuel consumption 15.3% above expected parameters for current speed and draft. Potential hull fouling or propeller issue.",
-      timeDetected: "4 days ago",
+      //timeDetected: "4 days ago",
       recommendation: "Monitor and investigate cause. Schedule underwater inspection if trend continues.",
       severity: "MEDIUM"
     },
     {
       title: "Weather Advisory - High Seas",
       description: "Moderate sea conditions expected in upcoming route segment. Forecasted wave heights 3-4m with occasional 5m swells.",
-      timeDetected: "6 hours ago",
+      //timeDetected: "6 hours ago",
       recommendation: "Monitor for potential changes. Secure deck cargo and prepare vessel for moderate rolling.",
       severity: "MEDIUM"
     },
     {
       title: "Port Congestion Alert",
       description: "Destination port reporting extended delays averaging 3.5 days for vessels of similar class. 14 vessels in queue.",
-      timeDetected: "1 day ago",
+      //timeDetected: "1 day ago",
       recommendation: "Consider schedule adjustments and slow steaming to optimize arrival time and reduce fuel consumption.",
       severity: "MEDIUM"
     },
     {
       title: "Planned Maintenance Due",
       description: "Multiple scheduled maintenance items due within 7 days, including main engine injector replacement and generator overhaul.",
-      timeDetected: "3 days ago",
+      //timeDetected: "3 days ago",
       recommendation: "Confirm parts availability on board. Schedule engineer's time appropriately before port arrival.",
       severity: "MEDIUM"
     },
     {
       title: "Communication System Degraded",
       description: "Satellite communication system operating at 68% capacity. Intermittent connectivity issues reported by bridge team.",
-      timeDetected: "8 hours ago",
+      //timeDetected: "8 hours ago",
       recommendation: "Monitor and troubleshoot antenna alignment. Schedule technician inspection at next port.",
       severity: "MEDIUM"
     }
@@ -239,21 +239,21 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName, pscScore }) => {
                       <p className="alert-item-description">{alert.description}</p>
                       
                       <div className="alert-item-metadata">
-                        <div className="metadata-item">
+                        {/* <div className="metadata-item">
                           <Clock size={12} />
                           <span>{alert.timeDetected}</span>
-                        </div>
+                        </div> */}
                         <div className="metadata-item">
                           <Shield size={12} />
                           <span>{alert.recommendation}</span>
                         </div>
                       </div>
                       
-                      <div className="alert-actions">
+                      {/* <div className="alert-actions">
                         <button className="alert-action-button">
                           Take Action
                         </button>
-                      </div>
+                      </div> */}
                     </li>
                   ))}
               </ul>
@@ -293,10 +293,10 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName, pscScore }) => {
                       <p className="alert-item-description">{alert.description}</p>
                       
                       <div className="alert-item-metadata">
-                        <div className="metadata-item">
+                        {/* <div className="metadata-item">
                           <Clock size={12} />
                           <span>{alert.timeDetected}</span>
-                        </div>
+                        </div> */}
                         <div className="metadata-item">
                           <Shield size={12} />
                           <span>{alert.recommendation}</span>
@@ -304,9 +304,9 @@ const AlertModal = ({ isOpen, onClose, alerts, vesselName, pscScore }) => {
                       </div>
                       
                       <div className="alert-actions">
-                        <button className="alert-action-button">
+                        {/* <button className="alert-action-button">
                           Review
-                        </button>
+                        </button> */}
                         {/* <button className="alert-action-button secondary">
                           View Details <ChevronRight size={12} />
                         </button> */}

@@ -90,7 +90,7 @@ const VesselTable = ({
 
   const getPSCRiskStyle = (score) => {
     let style = {
-      padding: '4px 12px',
+      padding: '4px 8px',
       borderRadius: '6px',
       fontWeight: '600',
       fontSize: '12px',
@@ -261,7 +261,7 @@ const VesselTable = ({
     const pscRiskColumn = {
       field: 'pscScore',
       label: 'PSC Risk',
-      width: '120px',
+      width: '100px',
       render: (value) => {
         const score = value !== null && value !== undefined ? Math.round(value) : null;
         const riskLevel = score < 60 ? 'High' : score < 80 ? 'Medium' : 'Low';
@@ -304,7 +304,7 @@ const VesselTable = ({
     const checklistStatusColumn = {
       field: 'checklistStatus',
       label: 'Checklist Status',
-      width: '120px',
+      width: '100px',
       render: (value) => (
         <div 
           style={getGlassyStatusStyle(value)}

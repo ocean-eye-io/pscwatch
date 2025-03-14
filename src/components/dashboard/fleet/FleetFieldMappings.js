@@ -5,7 +5,7 @@ export const fleetFieldMappings = {
       dbField: 'vessel_name',
       label: 'Vessel',
       priority: 1,
-      width: '160px'
+      width: '120px'
     },
     imo: {
       dbField: 'imo_no',
@@ -54,7 +54,7 @@ export const fleetFieldMappings = {
       dbField: 'eta',
       label: 'ETA',
       priority: 9,
-      width: '150px',
+      width: '120px',
       type: 'datetime'
 
     },
