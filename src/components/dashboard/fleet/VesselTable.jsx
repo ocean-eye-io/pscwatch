@@ -191,91 +191,74 @@ const VesselTable = ({
   };
 
   const getTableColumns = () => {
-    const columns = Object.entries(fieldMappings.TABLE)
+    // Create a map to store our columns with consistent rendering
+    const columnMap = {};
+    
+    // Process the standard columns from fieldMappings
+    Object.entries(fieldMappings.TABLE)
       .filter(([fieldId, field]) => !field.isAction && fieldId !== 'comments')
-      .sort((a, b) => a[1].priority - b[1].priority)
-      .map(([fieldId, field]) => ({
-        field: field.dbField,
-        label: field.label,
-        width: field.width,
-        minWidth: field.minWidth,
-        render: (value, rowData) => {
-          if (fieldId === 'event_type') {
-            return (
-              <StatusIndicator 
-                status={value}
-                color={getStatusColor(value)}
-              />
-            );
+      .forEach(([fieldId, field]) => {
+        columnMap[field.dbField] = {
+          field: field.dbField,
+          label: field.label,
+          width: field.width,
+          minWidth: field.minWidth,
+          render: (value, rowData) => {
+            if (fieldId === 'event_type') {
+              return (
+                <StatusIndicator 
+                  status={value}
+                  color={getStatusColor(value)}
+                />
+              );
+            }
+            
+            if (fieldId === 'riskScore') {
+              const score = value !== null && value !== undefined ? Math.round(value) : null;
+              return (
+                <TableBadge 
+                  variant={getRiskScoreVariant(score)}
+                >
+                  {score !== null ? score : '-'}
+                </TableBadge>
+              );
+            }
+            
+            if (field.type === 'date') {
+              return formatDateTime(value, false);
+            }
+            
+            if (
+              fieldId === 'eta' || 
+              fieldId === 'etb' || 
+              fieldId === 'etd' || 
+              fieldId === 'atd' ||
+              fieldId === 'psc_last_inspection_date'
+            ) {
+              return formatDateTime(value, true);
+            }
+            
+            if (fieldId === 'daysToGo' && typeof value === 'number') {
+              return value.toFixed(1);
+            }
+            
+            if (fieldId === 'checklist_received') {
+              return (
+                <CheckboxField 
+                  value={value}
+                  vessel={rowData}
+                  onUpdate={onUpdateVessel}
+                />
+              );
+            }
+            
+            return value === null || value === undefined ? '-' : value;
           }
-          
-          if (fieldId === 'riskScore') {
-            const score = value !== null && value !== undefined ? Math.round(value) : null;
-            return (
-              <TableBadge 
-                variant={getRiskScoreVariant(score)}
-              >
-                {score !== null ? score : '-'}
-              </TableBadge>
-            );
-          }
-          
-          if (field.type === 'date') {
-            return formatDateTime(value, false);
-          }
-          
-          if (
-            fieldId === 'eta' || 
-            fieldId === 'etb' || 
-            fieldId === 'etd' || 
-            fieldId === 'atd' ||
-            fieldId === 'psc_last_inspection_date'
-          ) {
-            return formatDateTime(value, true);
-          }
-          
-          if (fieldId === 'daysToGo' && typeof value === 'number') {
-            return value.toFixed(1);
-          }
-          
-          if (fieldId === 'checklist_received') {
-            return (
-              <CheckboxField 
-                value={value}
-                vessel={rowData}
-                onUpdate={onUpdateVessel}
-              />
-            );
-          }
-          
-          return value === null || value === undefined ? '-' : value;
-        }
-      }));
+        };
+      });
 
-    // Add Checklist Status column
-    columns.push({
-      field: 'checklistStatus',
-      label: 'Checklist Status',
-      width: '150px',
-      render: (value) => (
-        <div 
-          style={getGlassyStatusStyle(value)}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateZ(0) scale(1.02)';
-            e.currentTarget.style.boxShadow = e.currentTarget.style.boxShadow.replace('2px', '4px');
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateZ(0)';
-            e.currentTarget.style.boxShadow = e.currentTarget.style.boxShadow.replace('4px', '2px');
-          }}
-        >
-          {value || '-'}
-        </div>
-      )
-    });
-
-    // Add PSC Risk column
-    columns.push({
+    // Define PSC Risk column
+    const pscRiskColumn = {
       field: 'pscScore',
       label: 'PSC Risk',
       width: '150px',
@@ -300,10 +283,10 @@ const VesselTable = ({
           </div>
         );
       }
-    });
+    };
 
-    // Add Alerts column
-    columns.push({
+    // Define Alerts column
+    const alertsColumn = {
       field: 'alerts',
       label: 'Alerts',
       width: '100px',
@@ -315,9 +298,45 @@ const VesselTable = ({
           onClick={() => handleOpenAlertModal(rowData)}
         />
       )
-    });
+    };
+
+    // Define Checklist Status column
+    const checklistStatusColumn = {
+      field: 'checklistStatus',
+      label: 'Checklist Status',
+      width: '150px',
+      render: (value) => (
+        <div 
+          style={getGlassyStatusStyle(value)}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateZ(0) scale(1.02)';
+            e.currentTarget.style.boxShadow = e.currentTarget.style.boxShadow.replace('2px', '4px');
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateZ(0)';
+            e.currentTarget.style.boxShadow = e.currentTarget.style.boxShadow.replace('4px', '2px');
+          }}
+        >
+          {value || '-'}
+        </div>
+      )
+    };
     
-    return columns;
+    // Create the column sequence exactly as requested
+    // Vessel, IMO No, ETA, Arrival Port, PSC Risk, Alerts, Checklist Status, Comments
+    const orderedColumns = [
+      columnMap['vessel_name'],  // Vessel Name
+      columnMap['imo_no'],       // IMO No
+      columnMap['eta'],          // ETA
+      columnMap['port'],         // Arrival Port (assuming 'port' is the database field)
+      pscRiskColumn,             // PSC Risk
+      alertsColumn,              // Alerts
+      checklistStatusColumn      // Checklist Status
+      // Comments will be added as the actions column
+    ];
+    
+    // Filter out any undefined columns (in case any field names don't match)
+    return orderedColumns.filter(Boolean);
   };
 
   const renderExpandedContent = (vessel) => {
@@ -350,6 +369,7 @@ const VesselTable = ({
     );
   };
 
+  // Comments column (will be the last column as actions)
   const commentsColumn = {
     label: 'Comments',
     width: '180px',
@@ -406,10 +426,10 @@ const VesselTable = ({
   return (
     <>
       <Table
-        data={processedVessels} // Use the processed vessels instead of regenerating
+        data={processedVessels}
         columns={getTableColumns()}
         expandedContent={renderExpandedContent}
-        actions={commentsColumn}
+        actions={commentsColumn} // Comments will be the last column
         uniqueIdField="imo_no"
         defaultSortKey="eta"
         defaultSortDirection="desc"
