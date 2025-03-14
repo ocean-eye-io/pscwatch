@@ -261,7 +261,7 @@ const VesselTable = ({
     const pscRiskColumn = {
       field: 'pscScore',
       label: 'PSC Risk',
-      width: '150px',
+      width: '120px',
       render: (value) => {
         const score = value !== null && value !== undefined ? Math.round(value) : null;
         const riskLevel = score < 60 ? 'High' : score < 80 ? 'Medium' : 'Low';
@@ -289,7 +289,7 @@ const VesselTable = ({
     const alertsColumn = {
       field: 'alerts',
       label: 'Alerts',
-      width: '100px',
+      width: '80px',
       sortable: false,
       render: (value, rowData) => (
         <AlertIndicator
@@ -304,7 +304,7 @@ const VesselTable = ({
     const checklistStatusColumn = {
       field: 'checklistStatus',
       label: 'Checklist Status',
-      width: '150px',
+      width: '120px',
       render: (value) => (
         <div 
           style={getGlassyStatusStyle(value)}
@@ -372,7 +372,7 @@ const VesselTable = ({
   // Comments column (will be the last column as actions)
   const commentsColumn = {
     label: 'Comments',
-    width: '180px',
+    width: '150px',
     content: (vessel) => {
       const hasComments = vessel.comments && vessel.comments.trim().length > 0;
       
